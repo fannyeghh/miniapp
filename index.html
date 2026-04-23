@@ -1,1 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mini App Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+    }
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
 
+  <h1>Привет из Mini App 👋</h1>
+  <p id="info">Ожидание данных...</p>
+
+  <button onclick="sendData()">Отправить данные в Telegram</button>
+
+  <script>
+    // Подключение Telegram WebApp API
+    const tg = window.Telegram.WebApp;
+
+    // Разворачиваем приложение на весь экран
+    tg.expand();
+
+    // Показываем информацию о пользователе (если доступна)
+    const user = tg.initDataUnsafe?.user;
+    document.getElementById("info").innerText =
+      user ? `Привет, ${user.first_name}!` : "Пользователь не найден";
+
+    // Отправка данных в бота
+    function sendData() {
+      tg.sendData(JSON.stringify({ message: "Привет из Mini App!" }));
+    }
+  </script>
+
+  <!-- Подключение Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+</body>
+</html>
