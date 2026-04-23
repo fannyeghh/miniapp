@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Steam Top Up</title>
+  <title>EGH SHOP</title>
 
   <style>
     * {
@@ -15,11 +15,10 @@
       font-family: Arial, sans-serif;
       color: white;
       display: flex;
-      justify-content: center;
-      padding: 30px 15px;
+      flex-direction: column;
+      align-items: center;
       overflow-x: hidden;
 
-      /* 🌈 АНИМИРОВАННЫЙ ФОН */
       background: linear-gradient(-45deg,
         #05070f,
         #0b1220,
@@ -27,13 +26,37 @@
         #0b1b2e
       );
       background-size: 400% 400%;
-      animation: gradientMove 12s ease infinite;
+      animation: bgMove 12s ease infinite;
     }
 
-    @keyframes gradientMove {
+    @keyframes bgMove {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
+    }
+
+    /* 🔥 БАННЕР */
+    .banner {
+      width: 100%;
+      text-align: center;
+      padding: 22px;
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 3px;
+
+      /* ещё темнее фон */
+      background: linear-gradient(90deg, #020409, #070b14, #020409);
+
+      border-bottom: 1px solid rgba(56,189,248,0.15);
+
+      box-shadow: 0 0 25px rgba(0,0,0,0.6);
+      animation: glowBanner 3s ease-in-out infinite;
+    }
+
+    @keyframes glowBanner {
+      0% { text-shadow: 0 0 5px rgba(56,189,248,0.2); }
+      50% { text-shadow: 0 0 18px rgba(56,189,248,0.5); }
+      100% { text-shadow: 0 0 5px rgba(56,189,248,0.2); }
     }
 
     .page {
@@ -42,6 +65,7 @@
       max-width: 420px;
       flex-direction: column;
       align-items: center;
+      margin-top: 25px; /* ⬅ опустили ниже */
     }
 
     .active {
@@ -74,7 +98,6 @@
       outline: none;
       background: #0f172a;
       color: white;
-      transition: 0.25s;
     }
 
     input:focus, select:focus {
@@ -102,12 +125,10 @@
       color: black;
       font-weight: bold;
       transition: 0.2s;
-      box-shadow: 0 0 15px rgba(56,189,248,0.2);
     }
 
     .btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 0 25px rgba(56,189,248,0.35);
     }
 
     .back {
@@ -141,6 +162,11 @@
 
 <body>
 
+<!-- 🔥 БАННЕР -->
+<div class="banner">
+  EGH SHOP
+</div>
+
 <!-- 🏠 ФОРМА -->
 <div class="page active" id="home">
 
@@ -152,7 +178,6 @@
 
     <input id="amount" type="number" placeholder="Сумма">
 
-    <!-- 💱 ВАЛЮТА -->
     <select id="currency">
       <option value="RUB">RUB ₽</option>
       <option value="KZ">KZ ₸</option>
