@@ -2,47 +2,83 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Mini App Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Steam Top Up</title>
+
   <style>
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 50px;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
     }
-    button {
-      padding: 12px 20px;
-      font-size: 16px;
+
+    h1 {
+      margin-bottom: 30px;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .option {
+      background: #1e293b;
+      padding: 18px;
+      border-radius: 12px;
+      text-align: center;
       cursor: pointer;
+      transition: all 0.25s ease;
+      border: 1px solid transparent;
+      user-select: none;
+    }
+
+    .option:hover {
+      transform: translateY(-4px);
+      background: #334155;
+      border: 1px solid #38bdf8;
+      box-shadow: 0 10px 20px rgba(56, 189, 248, 0.2);
+    }
+
+    .option:active {
+      transform: scale(0.97);
     }
   </style>
 </head>
+
 <body>
 
-  <h1>Привет из Mini App 👋</h1>
-  <p id="info">Ожидание данных...</p>
+  <h1>Пополнение Steam</h1>
 
-  <button onclick="sendData()">Отправить данные в Telegram</button>
+  <div class="container">
+
+    <div class="option" onclick="openOption('https://example.com/topup1')">
+      💳 Пополнение 300 ₽
+    </div>
+
+    <div class="option" onclick="openOption('https://example.com/topup2')">
+      💳 Пополнение 500 ₽
+    </div>
+
+    <div class="option" onclick="openOption('https://example.com/topup3')">
+      💳 Пополнение 1000 ₽
+    </div>
+
+  </div>
 
   <script>
-    // Подключение Telegram WebApp API
-    const tg = window.Telegram.WebApp;
-
-    // Разворачиваем приложение на весь экран
-    tg.expand();
-
-    // Показываем информацию о пользователе (если доступна)
-    const user = tg.initDataUnsafe?.user;
-    document.getElementById("info").innerText =
-      user ? `Привет, ${user.first_name}!` : "Пользователь не найден";
-
-    // Отправка данных в бота
-    function sendData() {
-      tg.sendData(JSON.stringify({ message: "Привет из Mini App!" }));
+    function openOption(url) {
+      // можно заменить на Telegram WebApp действие
+      window.open(url, "_blank");
     }
   </script>
-
-  <!-- Подключение Telegram WebApp SDK -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 </body>
 </html>
