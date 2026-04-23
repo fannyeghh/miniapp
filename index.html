@@ -35,28 +35,26 @@
       100% { background-position: 0% 50%; }
     }
 
-    /* 🔥 БАННЕР */
+    /* 🔥 БАННЕР УВЕЛИЧЕННЫЙ */
     .banner {
       width: 100%;
       text-align: center;
-      padding: 22px;
-      font-size: 22px;
+      padding: 32px 20px;
+      font-size: 26px;
       font-weight: bold;
-      letter-spacing: 3px;
+      letter-spacing: 4px;
 
-      /* ещё темнее фон */
       background: linear-gradient(90deg, #020409, #070b14, #020409);
-
       border-bottom: 1px solid rgba(56,189,248,0.15);
 
-      box-shadow: 0 0 25px rgba(0,0,0,0.6);
+      box-shadow: 0 0 30px rgba(0,0,0,0.7);
       animation: glowBanner 3s ease-in-out infinite;
     }
 
     @keyframes glowBanner {
-      0% { text-shadow: 0 0 5px rgba(56,189,248,0.2); }
-      50% { text-shadow: 0 0 18px rgba(56,189,248,0.5); }
-      100% { text-shadow: 0 0 5px rgba(56,189,248,0.2); }
+      0% { text-shadow: 0 0 6px rgba(56,189,248,0.2); }
+      50% { text-shadow: 0 0 20px rgba(56,189,248,0.6); }
+      100% { text-shadow: 0 0 6px rgba(56,189,248,0.2); }
     }
 
     .page {
@@ -65,7 +63,7 @@
       max-width: 420px;
       flex-direction: column;
       align-items: center;
-      margin-top: 25px; /* ⬅ опустили ниже */
+      margin-top: 25px;
     }
 
     .active {
@@ -75,7 +73,6 @@
     h1 {
       margin-bottom: 20px;
       text-align: center;
-      text-shadow: 0 0 15px rgba(56,189,248,0.3);
     }
 
     .card {
@@ -91,7 +88,7 @@
       backdrop-filter: blur(10px);
     }
 
-    input, select {
+    input {
       padding: 12px;
       border-radius: 10px;
       border: 1px solid #334155;
@@ -100,7 +97,7 @@
       color: white;
     }
 
-    input:focus, select:focus {
+    input:focus {
       border-color: #38bdf8;
       box-shadow: 0 0 12px rgba(56,189,248,0.25);
     }
@@ -129,6 +126,60 @@
 
     .btn:hover {
       transform: translateY(-2px);
+    }
+
+    /* 💱 КАСТОМНЫЙ ДРОПДАУН */
+    .dropdown {
+      position: relative;
+      width: 100%;
+    }
+
+    .selected {
+      background: #0f172a;
+      border: 1px solid #334155;
+      padding: 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: 0.25s;
+    }
+
+    .selected:hover {
+      border-color: #38bdf8;
+      box-shadow: 0 0 12px rgba(56,189,248,0.2);
+    }
+
+    .options {
+      position: absolute;
+      top: 110%;
+      left: 0;
+      width: 100%;
+      background: rgba(15, 23, 42, 0.98);
+      border: 1px solid rgba(56,189,248,0.2);
+      border-radius: 14px;
+      overflow: hidden;
+
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: 0.25s ease;
+      z-index: 10;
+    }
+
+    .dropdown.active .options {
+      max-height: 200px;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .option {
+      padding: 12px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .option:hover {
+      background: rgba(56,189,248,0.15);
+      color: #38bdf8;
     }
 
     .back {
@@ -178,10 +229,15 @@
 
     <input id="amount" type="number" placeholder="Сумма">
 
-    <select id="currency">
-      <option value="RUB">RUB ₽</option>
-      <option value="KZ">KZ ₸</option>
-    </select>
+    <!-- 💱 КАСТОМ ВАЛЮТА -->
+    <div class="dropdown" id="dropdown">
+      <div class="selected" onclick="toggleDropdown()">RUB ₽</div>
+
+      <div class="options">
+        <div class="option" onclick="selectCurrency('RUB', '₽')">RUB ₽</div>
+        <div class="option" onclick="selectCurrency('KZ', '₸')">KZ ₸</div>
+      </div>
+    </div>
 
     <button class="btn" onclick="goToPayment()">Оплата</button>
 
@@ -205,6 +261,9 @@
 </div>
 
 <script>
+  let currency = "RUB";
+  let symbol = "₽";
+
   function openPage(id) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -213,19 +272,28 @@
   function goToPayment() {
     const login = document.getElementById("login").value.trim();
     const amount = document.getElementById("amount").value.trim();
-    const currency = document.getElementById("currency").value;
 
     if (!login || !amount) {
       showError("Заполни все поля для пополнения");
       return;
     }
 
-    const symbol = currency === "RUB" ? "₽" : "₸";
-
     document.getElementById("info").innerText =
       `Логин: ${login}\nСумма: ${amount} ${symbol}\nВалюта: ${currency}`;
 
     openPage('pay');
+  }
+
+  function toggleDropdown() {
+    document.getElementById("dropdown").classList.toggle("active");
+  }
+
+  function selectCurrency(cur, sym) {
+    currency = cur;
+    symbol = sym;
+
+    document.querySelector(".selected").innerText = `${cur} ${sym}`;
+    document.getElementById("dropdown").classList.remove("active");
   }
 
   function showError(text) {
@@ -250,6 +318,13 @@
 
     setTimeout(() => div.remove(), 2500);
   }
+
+  // закрытие дропдауна при клике вне
+  document.addEventListener("click", function(e) {
+    if (!document.getElementById("dropdown").contains(e.target)) {
+      document.getElementById("dropdown").classList.remove("active");
+    }
+  });
 </script>
 
 </body>
