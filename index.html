@@ -6,14 +6,19 @@
   <title>Steam Top Up</title>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #0f172a;
+      background: radial-gradient(circle at top, #0b1220, #05070f);
       color: white;
       display: flex;
       justify-content: center;
       padding: 30px 15px;
+      overflow-x: hidden;
     }
 
     .page {
@@ -31,30 +36,46 @@
     h1 {
       margin-bottom: 25px;
       text-align: center;
+      text-shadow: 0 0 15px rgba(56,189,248,0.3);
     }
 
     .card {
       width: 100%;
-      background: #1e293b;
-      padding: 20px;
-      border-radius: 14px;
+      background: rgba(30, 41, 59, 0.6);
+      padding: 22px;
+      border-radius: 16px;
       display: flex;
       flex-direction: column;
       gap: 12px;
+      border: 1px solid rgba(56,189,248,0.15);
+      box-shadow: 0 0 20px rgba(56,189,248,0.05);
+      backdrop-filter: blur(10px);
     }
 
     input {
       padding: 12px;
       border-radius: 10px;
-      border: none;
+      border: 1px solid #334155;
       outline: none;
       background: #0f172a;
       color: white;
-      border: 1px solid #334155;
+      transition: 0.25s;
     }
 
     input:focus {
       border-color: #38bdf8;
+      box-shadow: 0 0 12px rgba(56,189,248,0.25);
+    }
+
+    /* ❌ убираем стрелочки у number */
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
     }
 
     .btn {
@@ -63,20 +84,31 @@
       border: none;
       border-radius: 10px;
       cursor: pointer;
-      background: #38bdf8;
+      background: linear-gradient(90deg, #38bdf8, #60a5fa);
       color: black;
       font-weight: bold;
       transition: 0.2s;
+      box-shadow: 0 0 15px rgba(56,189,248,0.2);
     }
 
     .btn:hover {
       transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(56,189,248,0.35);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
     }
 
     .back {
       margin-top: 20px;
       color: #94a3b8;
       cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .back:hover {
+      color: white;
     }
 
     .qr {
@@ -91,13 +123,14 @@
       color: black;
       font-weight: bold;
       text-align: center;
-      padding: 10px;
+      box-shadow: 0 0 20px rgba(255,255,255,0.1);
     }
 
     .info {
       margin-top: 10px;
       color: #94a3b8;
       text-align: center;
+      white-space: pre-line;
     }
   </style>
 </head>
@@ -143,11 +176,11 @@
   }
 
   function goToPayment() {
-    const login = document.getElementById("login").value;
-    const amount = document.getElementById("amount").value;
+    const login = document.getElementById("login").value.trim();
+    const amount = document.getElementById("amount").value.trim();
 
     if (!login || !amount) {
-      alert("Заполни все поля");
+      showError("Заполни все поля для пополнения");
       return;
     }
 
@@ -155,6 +188,31 @@
       `Логин: ${login}\nСумма: ${amount} ₽`;
 
     openPage('pay');
+  }
+
+  // ⚡ вместо alert (фикс блокировки ввода)
+  function showError(text) {
+    const old = document.getElementById("error");
+    if (old) old.remove();
+
+    const div = document.createElement("div");
+    div.id = "error";
+    div.innerText = text;
+
+    div.style.position = "fixed";
+    div.style.bottom = "20px";
+    div.style.left = "50%";
+    div.style.transform = "translateX(-50%)";
+    div.style.background = "rgba(239,68,68,0.9)";
+    div.style.color = "white";
+    div.style.padding = "12px 18px";
+    div.style.borderRadius = "10px";
+    div.style.boxShadow = "0 0 15px rgba(239,68,68,0.4)";
+    div.style.zIndex = "9999";
+
+    document.body.appendChild(div);
+
+    setTimeout(() => div.remove(), 2500);
   }
 </script>
 
