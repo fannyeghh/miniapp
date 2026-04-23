@@ -33,28 +33,44 @@
       text-align: center;
     }
 
-    .container {
+    .card {
       width: 100%;
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 14px;
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 12px;
     }
 
-    .option {
-      background: #1e293b;
-      padding: 18px;
-      border-radius: 12px;
-      text-align: center;
+    input {
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      background: #0f172a;
+      color: white;
+      border: 1px solid #334155;
+    }
+
+    input:focus {
+      border-color: #38bdf8;
+    }
+
+    .btn {
+      margin-top: 10px;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
       cursor: pointer;
-      transition: all 0.25s ease;
-      border: 1px solid transparent;
+      background: #38bdf8;
+      color: black;
+      font-weight: bold;
+      transition: 0.2s;
     }
 
-    .option:hover {
-      transform: translateY(-4px);
-      background: #334155;
-      border: 1px solid #38bdf8;
-      box-shadow: 0 10px 20px rgba(56, 189, 248, 0.2);
+    .btn:hover {
+      transform: translateY(-2px);
     }
 
     .back {
@@ -62,62 +78,83 @@
       color: #94a3b8;
       cursor: pointer;
     }
+
+    .qr {
+      width: 200px;
+      height: 200px;
+      background: white;
+      border-radius: 12px;
+      margin: 20px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: black;
+      font-weight: bold;
+      text-align: center;
+      padding: 10px;
+    }
+
+    .info {
+      margin-top: 10px;
+      color: #94a3b8;
+      text-align: center;
+    }
   </style>
 </head>
 
 <body>
 
-<!-- 🏠 ГЛАВНАЯ -->
+<!-- 🏠 ФОРМА -->
 <div class="page active" id="home">
 
   <h1>Пополнение Steam</h1>
 
-  <div class="container">
+  <div class="card">
 
-    <div class="option" onclick="openPage('page1')">
-      💳 Пополнение 300 ₽
-    </div>
+    <input id="login" type="text" placeholder="Логин Steam">
 
-    <div class="option" onclick="openPage('page2')">
-      💳 Пополнение 500 ₽
-    </div>
+    <input id="amount" type="number" placeholder="Сумма">
 
-    <div class="option" onclick="openPage('page3')">
-      💳 Пополнение 1000 ₽
-    </div>
+    <button class="btn" onclick="goToPayment()">Оплата</button>
 
   </div>
 
 </div>
 
-<!-- 📄 300 -->
-<div class="page" id="page1">
-  <h1>Пополнение 300 ₽</h1>
-  <p>Вы выбрали пакет на 300 рублей.</p>
+<!-- 💳 ОПЛАТА -->
+<div class="page" id="pay">
+
+  <h1>Оплата</h1>
+
+  <div class="qr">
+    QR CODE<br>ЗАГЛУШКА
+  </div>
+
+  <div class="info" id="info"></div>
 
   <div class="back" onclick="openPage('home')">← Назад</div>
-</div>
 
-<!-- 📄 500 -->
-<div class="page" id="page2">
-  <h1>Пополнение 500 ₽</h1>
-  <p>Вы выбрали пакет на 500 рублей.</p>
-
-  <div class="back" onclick="openPage('home')">← Назад</div>
-</div>
-
-<!-- 📄 1000 -->
-<div class="page" id="page3">
-  <h1>Пополнение 1000 ₽</h1>
-  <p>Вы выбрали пакет на 1000 рублей.</p>
-
-  <div class="back" onclick="openPage('home')">← Назад</div>
 </div>
 
 <script>
   function openPage(id) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById(id).classList.add('active');
+  }
+
+  function goToPayment() {
+    const login = document.getElementById("login").value;
+    const amount = document.getElementById("amount").value;
+
+    if (!login || !amount) {
+      alert("Заполни все поля");
+      return;
+    }
+
+    document.getElementById("info").innerText =
+      `Логин: ${login}\nСумма: ${amount} ₽`;
+
+    openPage('pay');
   }
 </script>
 
