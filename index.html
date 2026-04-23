@@ -5,50 +5,70 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Steam Top Up</title>
 
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #0f172a;
+      background: #0b1220;
       color: white;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 20px;
+      padding: 30px 15px;
     }
 
     h1 {
-      margin-bottom: 30px;
+      margin-bottom: 25px;
+      font-size: 24px;
+      background: linear-gradient(90deg, #38bdf8, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .container {
+      width: 100%;
+      max-width: 420px;
       display: flex;
       flex-direction: column;
-      gap: 15px;
-      width: 100%;
-      max-width: 400px;
+      gap: 14px;
     }
 
-    .option {
-      background: #1e293b;
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
       padding: 18px;
-      border-radius: 12px;
-      text-align: center;
+      border-radius: 16px;
       cursor: pointer;
-      transition: all 0.25s ease;
-      border: 1px solid transparent;
-      user-select: none;
+      transition: 0.25s ease;
+      backdrop-filter: blur(10px);
     }
 
-    .option:hover {
+    .card:hover {
       transform: translateY(-4px);
-      background: #334155;
-      border: 1px solid #38bdf8;
-      box-shadow: 0 10px 20px rgba(56, 189, 248, 0.2);
+      border-color: #38bdf8;
+      box-shadow: 0 10px 25px rgba(56,189,248,0.15);
     }
 
-    .option:active {
-      transform: scale(0.97);
+    .title {
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .price {
+      color: #94a3b8;
+      font-size: 14px;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 4px 10px;
+      font-size: 12px;
+      border-radius: 999px;
+      background: rgba(56,189,248,0.15);
+      color: #38bdf8;
     }
   </style>
 </head>
@@ -59,24 +79,45 @@
 
   <div class="container">
 
-    <div class="option" onclick="openOption('https://example.com/topup1')">
-      💳 Пополнение 300 ₽
+    <div class="card" onclick="selectPack(300)">
+      <div class="title">Пополнение Steam</div>
+      <div class="price">300 ₽</div>
+      <div class="badge">Быстро · 1–2 мин</div>
     </div>
 
-    <div class="option" onclick="openOption('https://example.com/topup2')">
-      💳 Пополнение 500 ₽
+    <div class="card" onclick="selectPack(500)">
+      <div class="title">Пополнение Steam</div>
+      <div class="price">500 ₽</div>
+      <div class="badge">Популярно</div>
     </div>
 
-    <div class="option" onclick="openOption('https://example.com/topup3')">
-      💳 Пополнение 1000 ₽
+    <div class="card" onclick="selectPack(1000)">
+      <div class="title">Пополнение Steam</div>
+      <div class="price">1000 ₽</div>
+      <div class="badge">Выгодно</div>
     </div>
 
   </div>
 
   <script>
-    function openOption(url) {
-      // можно заменить на Telegram WebApp действие
-      window.open(url, "_blank");
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    function selectPack(amount) {
+      // отправляем выбор в бота
+      tg.sendData(JSON.stringify({
+        type: "steam_topup",
+        amount: amount
+      }));
+
+      // можно показать кнопку "оплатить" в Telegram
+      tg.MainButton.setText("Перейти к оплате");
+      tg.MainButton.show();
+
+      tg.MainButton.onClick(() => {
+        // пример: открыть оплату внутри Telegram
+        tg.openLink("https://example.com/pay?amount=" + amount);
+      });
     }
   </script>
 
