@@ -13,12 +13,27 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: radial-gradient(circle at top, #0b1220, #05070f);
       color: white;
       display: flex;
       justify-content: center;
       padding: 30px 15px;
       overflow-x: hidden;
+
+      /* 🌈 АНИМИРОВАННЫЙ ФОН */
+      background: linear-gradient(-45deg,
+        #05070f,
+        #0b1220,
+        #0f172a,
+        #0b1b2e
+      );
+      background-size: 400% 400%;
+      animation: gradientMove 12s ease infinite;
+    }
+
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     .page {
@@ -34,7 +49,7 @@
     }
 
     h1 {
-      margin-bottom: 25px;
+      margin-bottom: 20px;
       text-align: center;
       text-shadow: 0 0 15px rgba(56,189,248,0.3);
     }
@@ -52,7 +67,7 @@
       backdrop-filter: blur(10px);
     }
 
-    input {
+    input, select {
       padding: 12px;
       border-radius: 10px;
       border: 1px solid #334155;
@@ -62,12 +77,11 @@
       transition: 0.25s;
     }
 
-    input:focus {
+    input:focus, select:focus {
       border-color: #38bdf8;
       box-shadow: 0 0 12px rgba(56,189,248,0.25);
     }
 
-    /* ❌ убираем стрелочки у number */
     input[type=number]::-webkit-outer-spin-button,
     input[type=number]::-webkit-inner-spin-button {
       -webkit-appearance: none;
@@ -96,19 +110,10 @@
       box-shadow: 0 0 25px rgba(56,189,248,0.35);
     }
 
-    .btn:active {
-      transform: scale(0.98);
-    }
-
     .back {
       margin-top: 20px;
       color: #94a3b8;
       cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .back:hover {
-      color: white;
     }
 
     .qr {
@@ -123,7 +128,6 @@
       color: black;
       font-weight: bold;
       text-align: center;
-      box-shadow: 0 0 20px rgba(255,255,255,0.1);
     }
 
     .info {
@@ -147,6 +151,12 @@
     <input id="login" type="text" placeholder="Логин Steam">
 
     <input id="amount" type="number" placeholder="Сумма">
+
+    <!-- 💱 ВАЛЮТА -->
+    <select id="currency">
+      <option value="RUB">RUB ₽</option>
+      <option value="KZ">KZ ₸</option>
+    </select>
 
     <button class="btn" onclick="goToPayment()">Оплата</button>
 
@@ -178,19 +188,21 @@
   function goToPayment() {
     const login = document.getElementById("login").value.trim();
     const amount = document.getElementById("amount").value.trim();
+    const currency = document.getElementById("currency").value;
 
     if (!login || !amount) {
       showError("Заполни все поля для пополнения");
       return;
     }
 
+    const symbol = currency === "RUB" ? "₽" : "₸";
+
     document.getElementById("info").innerText =
-      `Логин: ${login}\nСумма: ${amount} ₽`;
+      `Логин: ${login}\nСумма: ${amount} ${symbol}\nВалюта: ${currency}`;
 
     openPage('pay');
   }
 
-  // ⚡ вместо alert (фикс блокировки ввода)
   function showError(text) {
     const old = document.getElementById("error");
     if (old) old.remove();
@@ -207,7 +219,6 @@
     div.style.color = "white";
     div.style.padding = "12px 18px";
     div.style.borderRadius = "10px";
-    div.style.boxShadow = "0 0 15px rgba(239,68,68,0.4)";
     div.style.zIndex = "9999";
 
     document.body.appendChild(div);
