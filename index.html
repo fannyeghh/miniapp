@@ -44,62 +44,60 @@
       100% { background-position: 0% 50%; }
     }
 
-    /* Парящие элементы */
-    .floating-item {
+    /* Летающие элементы - летят по диагонали */
+    .flying-item {
       position: fixed;
       pointer-events: none;
       z-index: 0;
-      opacity: 0.2;
-      animation: float 20s ease-in-out infinite;
-      filter: drop-shadow(0 0 5px rgba(56,189,248,0.3));
       user-select: none;
+      will-change: transform;
+      opacity: 0;
     }
-
-    @keyframes float {
-      0%, 100% { 
-        transform: translateY(0) rotate(0deg); 
-      }
-      25% { 
-        transform: translateY(-30px) rotate(5deg); 
-      }
-      75% { 
-        transform: translateY(30px) rotate(-5deg); 
-      }
+    
+    .flying-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 0 10px rgba(56,189,248,0.4));
+      transition: filter 0.3s ease;
     }
-
-    /* Стикер Steam-кошелька */
-    .wallet-sticker {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      width: 100px;
-      height: 100px;
-      background: linear-gradient(135deg, #1b2838, #2a475e);
-      border-radius: 25px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0.25;
-      pointer-events: none;
-      z-index: 0;
-      font-size: 50px;
-      box-shadow: 0 0 30px rgba(56,189,248,0.3);
-      animation: pulseWallet 3s ease-in-out infinite;
-    }
-
-    @keyframes pulseWallet {
-      0%, 100% { 
-        opacity: 0.2;
-        transform: scale(1);
-        box-shadow: 0 0 20px rgba(56,189,248,0.2);
+    
+    /* Анимация полёта по диагонали (сверху-справа → снизу-слева) */
+    @keyframes flyDiagonal {
+      0% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 0;
       }
-      50% { 
-        opacity: 0.35;
-        transform: scale(1.05);
-        box-shadow: 0 0 40px rgba(56,189,248,0.4);
+      10% {
+        opacity: 0.7;
+      }
+      90% {
+        opacity: 0.7;
+      }
+      100% {
+        transform: translate(-120vw, 120vh) rotate(360deg);
+        opacity: 0;
       }
     }
-
+    
+    /* Анимация полёта в другую сторону для разнообразия */
+    @keyframes flyDiagonalReverse {
+      0% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.7;
+      }
+      90% {
+        opacity: 0.7;
+      }
+      100% {
+        transform: translate(-100vw, 100vh) rotate(-360deg);
+        opacity: 0;
+      }
+    }
+    
     /* 🔥 БАННЕР */
     .banner {
       width: 100%;
@@ -323,14 +321,6 @@
       .steam-image img {
         max-width: 85%;
       }
-      
-      .wallet-sticker {
-        width: 70px;
-        height: 70px;
-        font-size: 35px;
-        bottom: 20px;
-        right: 20px;
-      }
     }
   </style>
 </head>
@@ -370,11 +360,6 @@
   <div class="info" id="info"></div>
 
   <div class="back" onclick="openPage('home')">← Назад</div>
-</div>
-
-<!-- Стикер кошелька -->
-<div class="wallet-sticker">
-  💰
 </div>
 
 <script>
@@ -450,73 +435,122 @@
     }
   });
 
-  // ========== ПАРЯЩИЕ ЭЛЕМЕНТЫ (Steam-карты и ключи) ==========
+  // ========== ЛЕТАЮЩИЕ КЛЮЧИ (диагональная анимация) ==========
   
-  function createFloatingItems() {
-    // Иконки для парящих элементов (игры, ключи, карты, скины, монеты)
-    const items = [
-      '🎮', '🎯', '💰', '💎', '🕹️', '🎲', '🏆', '⭐',  // игры и награды
-      '🔑', '🗝️', '💳', '🎴', '🃏', '🎫',           // ключи и карты
-      '💵', '💸', '🪙', '💎', '⚡', '🔥'             // деньги и энергия
-    ];
+  function createFlyingKeys() {
+    const keyCount = 15; // Количество летающих ключей
     
-    // Эмодзи скинов CS:GO/Steam
-    const skins = ['🔫', '🗡️', '🛡️', '🧤', '🎩', '👑', '💍', '🔮'];
-    
-    // Объединяем массивы
-    const allItems = [...items, ...skins];
-    
-    // Создаём 30 парящих элементов
-    for(let i = 0; i < 35; i++) {
-      const div = document.createElement('div');
-      div.className = 'floating-item';
+    for(let i = 0; i < keyCount; i++) {
+      const keyDiv = document.createElement('div');
+      keyDiv.className = 'flying-item';
       
-      // Выбираем случайную иконку
-      div.innerHTML = allItems[Math.floor(Math.random() * allItems.length)];
+      // Создаём img элемент
+      const img = document.createElement('img');
+      img.src = 'key.png'; // Ваш файл ключа
+      img.alt = 'Steam Key';
       
-      // Случайное положение
-      div.style.left = Math.random() * 100 + '%';
-      div.style.top = Math.random() * 100 + '%';
+      // Проверка загрузки изображения
+      img.onerror = function() {
+        console.warn('Не удалось загрузить key.png, используем эмодзи');
+        keyDiv.innerHTML = '🔑'; // Fallback на эмодзи
+        keyDiv.style.fontSize = size + 'px';
+        keyDiv.style.display = 'flex';
+        keyDiv.style.alignItems = 'center';
+        keyDiv.style.justifyContent = 'center';
+      };
       
-      // Случайный размер
-      const size = Math.random() * 35 + 20;
-      div.style.fontSize = size + 'px';
+      keyDiv.appendChild(img);
       
-      // Случайная задержка анимации
-      div.style.animationDelay = Math.random() * 15 + 's';
+      // Случайный размер от 30px до 80px
+      const size = Math.random() * 50 + 30;
+      keyDiv.style.width = size + 'px';
+      keyDiv.style.height = size + 'px';
       
-      // Случайная длительность анимации
-      div.style.animationDuration = Math.random() * 15 + 15 + 's';
+      // Стартовая позиция (правый верхний угол с вариациями)
+      const startX = 80 + Math.random() * 20; // 80-100% (правая сторона)
+      const startY = Math.random() * 30; // 0-30% (верхняя часть)
+      keyDiv.style.left = startX + '%';
+      keyDiv.style.top = startY + '%';
       
-      // Случайная прозрачность
-      div.style.opacity = Math.random() * 0.15 + 0.08;
+      // Случайная задержка начала анимации
+      const delay = Math.random() * 15; // 0-15 секунд
       
-      // Добавляем на страницу
-      document.body.appendChild(div);
+      // Случайная длительность полёта
+      const duration = Math.random() * 8 + 6; // 6-14 секунд
+      
+      // Выбираем направление анимации (прямое или обратное)
+      const animationType = Math.random() > 0.7 ? 'flyDiagonalReverse' : 'flyDiagonal';
+      
+      // Применяем анимацию
+      keyDiv.style.animation = `${animationType} ${duration}s linear ${delay}s infinite`;
+      
+      // Случайное вращение в начале
+      const startRotate = Math.random() * 360;
+      keyDiv.style.transform = `rotate(${startRotate}deg)`;
+      
+      // Добавляем эффект вращения для некоторых ключей
+      if (Math.random() > 0.5) {
+        keyDiv.classList.add('spin');
+      }
+      
+      document.body.appendChild(keyDiv);
     }
   }
   
-  // Дополнительно создаём маленькие парящие точки (эффект звезд)
-  function createStars() {
-    for(let i = 0; i < 50; i++) {
-      const star = document.createElement('div');
-      star.className = 'floating-item';
-      star.innerHTML = '•';
-      star.style.left = Math.random() * 100 + '%';
-      star.style.top = Math.random() * 100 + '%';
-      star.style.fontSize = Math.random() * 8 + 4 + 'px';
-      star.style.opacity = Math.random() * 0.1 + 0.05;
-      star.style.animationDuration = Math.random() * 20 + 10 + 's';
-      star.style.animationDelay = Math.random() * 10 + 's';
-      document.body.appendChild(star);
+  // Добавляем CSS для вращения
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes flyDiagonal {
+      0% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.8;
+      }
+      90% {
+        opacity: 0.8;
+      }
+      100% {
+        transform: translate(-120vw, 110vh) rotate(360deg);
+        opacity: 0;
+      }
     }
-  }
+    
+    @keyframes flyDiagonalReverse {
+      0% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.8;
+      }
+      90% {
+        opacity: 0.8;
+      }
+      100% {
+        transform: translate(-100vw, 100vh) rotate(-360deg);
+        opacity: 0;
+      }
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .flying-item.spin img {
+      animation: spin 3s linear infinite;
+    }
+  `;
+  document.head.appendChild(style);
   
-  // Запускаем создание элементов
-  createFloatingItems();
-  createStars();
+  // Запускаем создание летающих ключей после загрузки страницы
+  window.addEventListener('load', function() {
+    setTimeout(createFlyingKeys, 100);
+  });
   
-  console.log("🎮 EGH SHOP: Парящие Steam-элементы активированы!");
+  console.log("🗝️ EGH SHOP: Летающие ключи активированы!");
 </script>
 
 </body>
