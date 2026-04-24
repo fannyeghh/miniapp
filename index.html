@@ -14,7 +14,6 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      user-select: none;
     }
 
     body {
@@ -69,10 +68,6 @@
       transition: all 0.3s ease;
       font-size: 22px;
       backdrop-filter: blur(10px);
-    }
-
-    .admin-btn:hover {
-      transform: scale(1.1);
     }
 
     .admin-modal {
@@ -437,8 +432,6 @@
   const tg = window.Telegram.WebApp;
   tg.expand();
   
-  // НЕ используем enableClosingConfirmation - она может вызывать проблемы
-
   let currency = "RUB";
   let symbol = "₽";
   let currentOrderId = null;
@@ -447,17 +440,59 @@
   const ADMIN_ID = 1641610032;
   const isAdmin = currentUser.id === ADMIN_ID;
 
-  // Локальное хранилище заказов
-  let localOrders = JSON.parse(localStorage.getItem('egh_orders') || '{}');
+  // Загружаем заказы из localStorage
+  let allOrders = JSON.parse(localStorage.getItem('egh_orders_all') || '{}');
 
-  // Показываем кнопку админа
+  // Отправка уведомления админу через fetch (HTTP запрос к боту)
+  function notifyAdmin(orderData) {
+    // Отправляем через бот API напрямую
+    const BOT_TOKEN = "8401761912:AAHVbT0aklCJZhBWG6li_gpFR7RCrvbiq7Q";
+    const ADMIN_ID_STR = "1641610032";
+    
+    const message = `🆕 НОВЫЙ ЗАКАЗ!
+
+🆔 Заказ: #${orderData.order_id}
+👤 Покупатель: @${orderData.username}
+🎮 Логин Steam: ${orderData.login}
+💰 Сумма: ${orderData.amount} ${orderData.symbol}
+💱 Валюта: ${orderData.currency}
+📅 Время: ${orderData.timestamp}
+
+Для подтверждения зайдите в админ-панель мини-аппа (кнопка 👑)`;
+    
+    // Отправляем через Telegram Bot API
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: ADMIN_ID_STR,
+        text: message,
+        parse_mode: 'HTML'
+      })
+    }).catch(e => console.log("Ошибка отправки уведомления:", e));
+  }
+
+  // Отправка уведомления пользователю
+  function notifyUser(userId, message) {
+    const BOT_TOKEN = "8401761912:AAHVbT0aklCJZhBWG6li_gpFR7RCrvbiq7Q";
+    
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: userId,
+        text: message,
+        parse_mode: 'HTML'
+      })
+    }).catch(e => console.log("Ошибка отправки уведомления пользователю:", e));
+  }
+
   if (isAdmin) {
     document.getElementById('adminBtn').style.display = 'flex';
-    loadOrdersFromStorage();
+    loadAdminOrders();
   }
 
   function goBack() {
-    // Очищаем форму
     document.getElementById("login").value = "";
     document.getElementById("amount").value = "";
     openPage('home');
@@ -496,34 +531,27 @@
       status: 'pending'
     };
 
-    // Сохраняем локально
-    localOrders[currentOrderId] = orderData;
-    localStorage.setItem('egh_orders', JSON.stringify(localOrders));
+    // Сохраняем в локальное хранилище
+    allOrders[currentOrderId] = orderData;
+    localStorage.setItem('egh_orders_all', JSON.stringify(allOrders));
 
-    // Отправляем уведомление боту (если получится - хорошо, если нет - заказ всё равно сохранён)
-    try {
-      tg.sendData(JSON.stringify({
-        action: 'new_order',
-        ...orderData
-      }));
-    } catch(e) {
-      console.log("Ошибка отправки в бот, но заказ сохранён:", e);
-    }
+    // Отправляем уведомление админу через HTTP
+    notifyAdmin(orderData);
 
     // Показываем статус
     document.getElementById("info").innerHTML = 
       `🧑 Покупатель: @${orderData.username}<br>` +
       `🎮 Логин: ${login}<br>` +
       `💵 Сумма: ${amount} ${symbol}<br><br>` +
-      `🟡 Статус: Ожидает подтверждения<br><br>` +
+      `🟡 Статус: <span style="color: #f59e0b;">Ожидает подтверждения</span><br><br>` +
       `📢 Администратор уведомлён`;
 
     openPage('pay');
     
-    // Показываем попап что заказ создан
+    // Показываем попап
     tg.showPopup({
-      title: "Заказ создан",
-      message: `Ваш заказ на ${amount} ${symbol} отправлен!\nОжидайте подтверждения.`,
+      title: "✅ Заказ создан",
+      message: `Заказ #${currentOrderId} на сумму ${amount} ${symbol} отправлен!`,
       buttons: [{type: "ok"}]
     });
   }
@@ -554,16 +582,16 @@
   function openAdminPanel() {
     if (!isAdmin) return;
     document.getElementById('adminModal').classList.add('active');
-    loadOrdersFromStorage();
+    loadAdminOrders();
   }
 
   function closeAdminPanel() {
     document.getElementById('adminModal').classList.remove('active');
   }
 
-  function loadOrdersFromStorage() {
+  function loadAdminOrders() {
     const ordersList = document.getElementById('ordersList');
-    const pendingOrders = Object.values(localOrders).filter(order => order.status === 'pending');
+    const pendingOrders = Object.values(allOrders).filter(order => order.status === 'pending');
     
     if (pendingOrders.length === 0) {
       ordersList.innerHTML = '<div style="text-align: center; padding: 40px;">📭 Нет активных заказов</div>';
@@ -571,7 +599,7 @@
     }
 
     ordersList.innerHTML = pendingOrders.map(order => `
-      <div class="order-card" id="order_${order.order_id}">
+      <div class="order-card">
         <div class="order-info">
           <p><strong>🆔 Заказ:</strong> #${order.order_id}</p>
           <p><strong>👤 Покупатель:</strong> @${order.username}</p>
@@ -589,34 +617,26 @@
   }
 
   function approveOrder(orderId) {
-    const order = localOrders[orderId];
+    const order = allOrders[orderId];
     if (!order) {
       showError("Заказ не найден");
       return;
     }
     
     order.status = 'completed';
-    localStorage.setItem('egh_orders', JSON.stringify(localOrders));
+    localStorage.setItem('egh_orders_all', JSON.stringify(allOrders));
     
-    // Отправляем уведомление боту
-    try {
-      tg.sendData(JSON.stringify({
-        action: 'approve_order',
-        order_id: orderId,
-        user_id: order.user_id,
-        amount: order.amount,
-        symbol: order.symbol,
-        login: order.login
-      }));
-    } catch(e) {
-      console.log("Ошибка отправки в бот:", e);
-    }
+    // Уведомляем пользователя
+    notifyUser(order.user_id, 
+      `✅ <b>ВАШ ЗАКАЗ #${orderId} ПОДТВЕРЖДЁН!</b>\n\n` +
+      `💰 Сумма: ${order.amount} ${order.symbol}\n` +
+      `🎮 Логин: ${order.login}\n\n` +
+      `🎉 Спасибо за покупку!`
+    );
     
-    // Обновляем отображение
-    loadOrdersFromStorage();
+    loadAdminOrders();
     showError(`✅ Заказ #${orderId} подтверждён!`);
     
-    // Если это текущий заказ пользователя
     if (currentOrderId == orderId) {
       document.getElementById("info").innerHTML = 
         `🧑 Покупатель: @${order.username}<br>` +
@@ -628,33 +648,25 @@
   }
 
   function rejectOrder(orderId) {
-    const order = localOrders[orderId];
+    const order = allOrders[orderId];
     if (!order) {
       showError("Заказ не найден");
       return;
     }
     
     order.status = 'rejected';
-    localStorage.setItem('egh_orders', JSON.stringify(localOrders));
+    localStorage.setItem('egh_orders_all', JSON.stringify(allOrders));
     
-    // Отправляем уведомление боту
-    try {
-      tg.sendData(JSON.stringify({
-        action: 'reject_order',
-        order_id: orderId,
-        user_id: order.user_id,
-        amount: order.amount,
-        symbol: order.symbol
-      }));
-    } catch(e) {
-      console.log("Ошибка отправки в бот:", e);
-    }
+    // Уведомляем пользователя
+    notifyUser(order.user_id,
+      `❌ <b>ВАШ ЗАКАЗ #${orderId} ОТКЛОНЁН</b>\n\n` +
+      `💰 Сумма: ${order.amount} ${order.symbol}\n\n` +
+      `💸 Средства возвращены на баланс.`
+    );
     
-    // Обновляем отображение
-    loadOrdersFromStorage();
+    loadAdminOrders();
     showError(`❌ Заказ #${orderId} отклонён!`);
     
-    // Если это текущий заказ пользователя
     if (currentOrderId == orderId) {
       document.getElementById("info").innerHTML = 
         `🧑 Покупатель: @${order.username}<br>` +
@@ -665,7 +677,6 @@
     }
   }
 
-  // Закрытие дропдауна
   document.addEventListener("click", function(e) {
     const dropdown = document.getElementById("dropdown");
     if (dropdown && !dropdown.contains(e.target)) {
@@ -673,7 +684,6 @@
     }
   });
 
-  // Enter для отправки
   document.addEventListener("keypress", function(e) {
     if (e.key === "Enter" && document.getElementById("home").classList.contains("active")) {
       pay();
