@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <title>EGH SHOP</title>
+  <title>EGH SHOP - Пополнение Steam</title>
 
   <!-- 🔥 ШРИФТ -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
@@ -17,20 +17,25 @@
       box-sizing: border-box;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      margin: 0;
+      padding: 0;
     }
 
     body {
       margin: 0;
       font-family: 'Nunito', sans-serif;
       color: #e5e7eb;
-
       display: flex;
       flex-direction: column;
       align-items: center;
+      position: relative;
+      overflow-x: hidden;
+      min-height: 100vh;
 
-      background: linear-gradient(-45deg, #05070f, #0b1220, #0f172a, #0b1b2e);
+      /* Тёмный градиентный фон */
+      background: linear-gradient(-45deg, #0a0e1a, #0f172a, #1a1f35, #0a0e1a);
       background-size: 400% 400%;
-      animation: bgMove 12s ease infinite;
+      animation: bgMove 15s ease infinite;
     }
 
     @keyframes bgMove {
@@ -39,27 +44,94 @@
       100% { background-position: 0% 50%; }
     }
 
+    /* Парящие элементы */
+    .floating-item {
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.2;
+      animation: float 20s ease-in-out infinite;
+      filter: drop-shadow(0 0 5px rgba(56,189,248,0.3));
+      user-select: none;
+    }
+
+    @keyframes float {
+      0%, 100% { 
+        transform: translateY(0) rotate(0deg); 
+      }
+      25% { 
+        transform: translateY(-30px) rotate(5deg); 
+      }
+      75% { 
+        transform: translateY(30px) rotate(-5deg); 
+      }
+    }
+
+    /* Стикер Steam-кошелька */
+    .wallet-sticker {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #1b2838, #2a475e);
+      border-radius: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.25;
+      pointer-events: none;
+      z-index: 0;
+      font-size: 50px;
+      box-shadow: 0 0 30px rgba(56,189,248,0.3);
+      animation: pulseWallet 3s ease-in-out infinite;
+    }
+
+    @keyframes pulseWallet {
+      0%, 100% { 
+        opacity: 0.2;
+        transform: scale(1);
+        box-shadow: 0 0 20px rgba(56,189,248,0.2);
+      }
+      50% { 
+        opacity: 0.35;
+        transform: scale(1.05);
+        box-shadow: 0 0 40px rgba(56,189,248,0.4);
+      }
+    }
+
     /* 🔥 БАННЕР */
     .banner {
       width: 100%;
       text-align: center;
-      padding: 32px 20px;
-
+      padding: 25px 20px;
       font-size: 28px;
       font-weight: 800;
       letter-spacing: 3px;
-
       color: #e5e7eb;
-
-      text-shadow:
-        0 0 12px rgba(255,255,255,0.2),
-        0 0 25px rgba(56,189,248,0.25);
-
+      text-shadow: 0 0 12px rgba(255,255,255,0.2), 0 0 25px rgba(56,189,248,0.25);
       background: linear-gradient(90deg, #020409, #070b14, #020409);
       border-bottom: 1px solid rgba(56,189,248,0.15);
+      position: relative;
+      z-index: 1;
     }
 
-    /* Стиль для картинки */
+    .page {
+      display: none;
+      width: 100%;
+      max-width: 420px;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 25px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .active {
+      display: flex;
+    }
+
+    /* Стиль для картинки Steam */
     .steam-image {
       text-align: center;
       margin: 20px 0 10px 0;
@@ -77,30 +149,15 @@
       transform: scale(1.02);
     }
 
-    .page {
-      display: none;
-      width: 100%;
-      max-width: 420px;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 15px;
-    }
-
-    .active {
-      display: flex;
-    }
-
     .card {
       width: 100%;
-      background: rgba(30, 41, 59, 0.6);
+      background: rgba(30, 41, 59, 0.7);
       padding: 22px;
       border-radius: 18px;
-
       display: flex;
       flex-direction: column;
       gap: 12px;
-
-      border: 1px solid rgba(56,189,248,0.15);
+      border: 1px solid rgba(56,189,248,0.2);
       box-shadow: 0 0 20px rgba(56,189,248,0.05);
       backdrop-filter: blur(10px);
     }
@@ -111,7 +168,6 @@
       border: 1px solid #334155;
       background: #0f172a;
       color: #e5e7eb;
-
       font-family: 'Nunito', sans-serif;
       font-size: 16px;
     }
@@ -128,14 +184,11 @@
       border: none;
       border-radius: 12px;
       cursor: pointer;
-
       font-weight: 800;
       font-family: 'Nunito', sans-serif;
       font-size: 16px;
-
       background: linear-gradient(90deg, #38bdf8, #60a5fa);
       color: #020617;
-
       transition: 0.2s;
     }
 
@@ -175,15 +228,12 @@
       top: 110%;
       width: 100%;
       z-index: 100;
-
       background: rgba(15, 23, 42, 0.98);
       border: 1px solid rgba(56,189,248,0.2);
       border-radius: 14px;
-
       max-height: 0;
       overflow: hidden;
       opacity: 0;
-
       transition: 0.25s;
     }
 
@@ -208,11 +258,9 @@
       height: 200px;
       background: white;
       border-radius: 12px;
-
       display: flex;
       align-items: center;
       justify-content: center;
-
       color: black;
       font-weight: bold;
       margin: 0 auto;
@@ -247,11 +295,9 @@
       left: 50%;
       transform: translateX(-50%);
       z-index: 1000;
-
       background: rgba(239,68,68,0.95);
       padding: 12px 18px;
       border-radius: 10px;
-      
       font-weight: 600;
       animation: slideUp 0.3s ease;
     }
@@ -277,6 +323,14 @@
       .steam-image img {
         max-width: 85%;
       }
+      
+      .wallet-sticker {
+        width: 70px;
+        height: 70px;
+        font-size: 35px;
+        bottom: 20px;
+        right: 20px;
+      }
     }
   </style>
 </head>
@@ -287,7 +341,7 @@
 
 <div class="page active" id="home">
   
-  <!-- ВОТ ЗДЕСЬ ВАША КАРТИНКА! -->
+  <!-- Ваша картинка Steam -->
   <div class="steam-image">
     <img src="image.png" alt="Steam Пополнение">
   </div>
@@ -316,6 +370,11 @@
   <div class="info" id="info"></div>
 
   <div class="back" onclick="openPage('home')">← Назад</div>
+</div>
+
+<!-- Стикер кошелька -->
+<div class="wallet-sticker">
+  💰
 </div>
 
 <script>
@@ -361,7 +420,6 @@
   function selectCurrency(cur, sym) {
     currency = cur;
     symbol = sym;
-
     document.querySelector(".selected").innerHTML = `${cur} ${sym}`;
     document.getElementById("dropdown").classList.remove("active");
   }
@@ -370,7 +428,6 @@
     const div = document.createElement("div");
     div.className = "error";
     div.innerText = "❌ " + text;
-
     document.body.appendChild(div);
     setTimeout(() => {
       div.style.opacity = '0';
@@ -378,6 +435,7 @@
     }, 2000);
   }
 
+  // Закрытие дропдауна при клике вне
   document.addEventListener("click", function(e) {
     const dropdown = document.getElementById("dropdown");
     if (dropdown && !dropdown.contains(e.target)) {
@@ -385,11 +443,80 @@
     }
   });
 
+  // Поддержка Enter
   document.addEventListener("keypress", function(e) {
     if (e.key === "Enter" && document.getElementById("home").classList.contains("active")) {
       pay();
     }
   });
+
+  // ========== ПАРЯЩИЕ ЭЛЕМЕНТЫ (Steam-карты и ключи) ==========
+  
+  function createFloatingItems() {
+    // Иконки для парящих элементов (игры, ключи, карты, скины, монеты)
+    const items = [
+      '🎮', '🎯', '💰', '💎', '🕹️', '🎲', '🏆', '⭐',  // игры и награды
+      '🔑', '🗝️', '💳', '🎴', '🃏', '🎫',           // ключи и карты
+      '💵', '💸', '🪙', '💎', '⚡', '🔥'             // деньги и энергия
+    ];
+    
+    // Эмодзи скинов CS:GO/Steam
+    const skins = ['🔫', '🗡️', '🛡️', '🧤', '🎩', '👑', '💍', '🔮'];
+    
+    // Объединяем массивы
+    const allItems = [...items, ...skins];
+    
+    // Создаём 30 парящих элементов
+    for(let i = 0; i < 35; i++) {
+      const div = document.createElement('div');
+      div.className = 'floating-item';
+      
+      // Выбираем случайную иконку
+      div.innerHTML = allItems[Math.floor(Math.random() * allItems.length)];
+      
+      // Случайное положение
+      div.style.left = Math.random() * 100 + '%';
+      div.style.top = Math.random() * 100 + '%';
+      
+      // Случайный размер
+      const size = Math.random() * 35 + 20;
+      div.style.fontSize = size + 'px';
+      
+      // Случайная задержка анимации
+      div.style.animationDelay = Math.random() * 15 + 's';
+      
+      // Случайная длительность анимации
+      div.style.animationDuration = Math.random() * 15 + 15 + 's';
+      
+      // Случайная прозрачность
+      div.style.opacity = Math.random() * 0.15 + 0.08;
+      
+      // Добавляем на страницу
+      document.body.appendChild(div);
+    }
+  }
+  
+  // Дополнительно создаём маленькие парящие точки (эффект звезд)
+  function createStars() {
+    for(let i = 0; i < 50; i++) {
+      const star = document.createElement('div');
+      star.className = 'floating-item';
+      star.innerHTML = '•';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.fontSize = Math.random() * 8 + 4 + 'px';
+      star.style.opacity = Math.random() * 0.1 + 0.05;
+      star.style.animationDuration = Math.random() * 20 + 10 + 's';
+      star.style.animationDelay = Math.random() * 10 + 's';
+      document.body.appendChild(star);
+    }
+  }
+  
+  // Запускаем создание элементов
+  createFloatingItems();
+  createStars();
+  
+  console.log("🎮 EGH SHOP: Парящие Steam-элементы активированы!");
 </script>
 
 </body>
