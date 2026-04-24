@@ -443,48 +443,16 @@
   // Загружаем заказы из localStorage
   let allOrders = JSON.parse(localStorage.getItem('egh_orders_all') || '{}');
 
-  // Отправка уведомления админу через fetch (HTTP запрос к боту)
-  function notifyAdmin(orderData) {
-    // Отправляем через бот API напрямую
-    const BOT_TOKEN = "8401761912:AAHVbT0aklCJZhBWG6li_gpFR7RCrvbiq7Q";
-    const ADMIN_ID_STR = "1641610032";
-    
-    const message = `🆕 НОВЫЙ ЗАКАЗ!
-
-🆔 Заказ: #${orderData.order_id}
-👤 Покупатель: @${orderData.username}
-🎮 Логин Steam: ${orderData.login}
-💰 Сумма: ${orderData.amount} ${orderData.symbol}
-💱 Валюта: ${orderData.currency}
-📅 Время: ${orderData.timestamp}
-
-Для подтверждения зайдите в админ-панель мини-аппа (кнопка 👑)`;
-    
-    // Отправляем через Telegram Bot API
-    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: ADMIN_ID_STR,
-        text: message,
-        parse_mode: 'HTML'
-      })
-    }).catch(e => console.log("Ошибка отправки уведомления:", e));
-  }
-
-  // Отправка уведомления пользователю
-  function notifyUser(userId, message) {
-    const BOT_TOKEN = "8401761912:AAHVbT0aklCJZhBWG6li_gpFR7RCrvbiq7Q";
-    
-    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: userId,
-        text: message,
-        parse_mode: 'HTML'
-      })
-    }).catch(e => console.log("Ошибка отправки уведомления пользователю:", e));
+  // Отправка через tg.sendData (работает всегда для любых пользователей!)
+  function sendToBot(data) {
+    try {
+      tg.sendData(JSON.stringify(data));
+      console.log("Отправлено через tg.sendData:", data);
+      return true;
+    } catch(e) {
+      console.error("Ошибка tg.sendData:", e);
+      return false;
+    }
   }
 
   if (isAdmin) {
@@ -520,6 +488,7 @@
     currentOrderId = Date.now();
 
     const orderData = {
+      action: 'new_order',
       order_id: currentOrderId,
       login: login,
       amount: amount,
@@ -535,8 +504,13 @@
     allOrders[currentOrderId] = orderData;
     localStorage.setItem('egh_orders_all', JSON.stringify(allOrders));
 
-    // Отправляем уведомление админу через HTTP
-    notifyAdmin(orderData);
+    // Отправляем через tg.sendData (это работает для любых пользователей!)
+    const sent = sendToBot(orderData);
+    
+    if (!sent) {
+      // Если не отправилось, показываем предупреждение
+      showError("⚠️ Заказ сохранён локально, но не отправлен. Попробуйте ещё раз.");
+    }
 
     // Показываем статус
     document.getElementById("info").innerHTML = 
@@ -626,13 +600,15 @@
     order.status = 'completed';
     localStorage.setItem('egh_orders_all', JSON.stringify(allOrders));
     
-    // Уведомляем пользователя
-    notifyUser(order.user_id, 
-      `✅ <b>ВАШ ЗАКАЗ #${orderId} ПОДТВЕРЖДЁН!</b>\n\n` +
-      `💰 Сумма: ${order.amount} ${order.symbol}\n` +
-      `🎮 Логин: ${order.login}\n\n` +
-      `🎉 Спасибо за покупку!`
-    );
+    // Отправляем уведомление через tg.sendData
+    sendToBot({
+      action: 'approve_order',
+      order_id: orderId,
+      user_id: order.user_id,
+      amount: order.amount,
+      symbol: order.symbol,
+      login: order.login
+    });
     
     loadAdminOrders();
     showError(`✅ Заказ #${orderId} подтверждён!`);
@@ -657,12 +633,14 @@
     order.status = 'rejected';
     localStorage.setItem('egh_orders_all', JSON.stringify(allOrders));
     
-    // Уведомляем пользователя
-    notifyUser(order.user_id,
-      `❌ <b>ВАШ ЗАКАЗ #${orderId} ОТКЛОНЁН</b>\n\n` +
-      `💰 Сумма: ${order.amount} ${order.symbol}\n\n` +
-      `💸 Средства возвращены на баланс.`
-    );
+    // Отправляем уведомление через tg.sendData
+    sendToBot({
+      action: 'reject_order',
+      order_id: orderId,
+      user_id: order.user_id,
+      amount: order.amount,
+      symbol: order.symbol
+    });
     
     loadAdminOrders();
     showError(`❌ Заказ #${orderId} отклонён!`);
