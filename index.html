@@ -455,20 +455,6 @@
   
   const currentUser = tg.initDataUnsafe?.user || {};
 
-  // Проверка админа через бота
-  function checkAdminStatus() {
-    tg.sendData(JSON.stringify({ action: 'check_admin', user_id: currentUser.id }));
-  }
-
-  // Вызывается из бота
-  window.setAdminStatus = function(admin) {
-    isAdmin = admin;
-    if (isAdmin) {
-      document.getElementById('adminBtn').style.display = 'flex';
-      loadOrders();
-    }
-  };
-
   function goBack() {
     openPage('home');
   }
@@ -508,7 +494,14 @@
     };
 
     // Отправляем боту
-    tg.sendData(JSON.stringify(orderData));
+    try {
+      tg.sendData(JSON.stringify(orderData));
+      console.log("Заказ отправлен:", orderData);
+    } catch(e) {
+      console.error("Ошибка отправки:", e);
+      showError("Ошибка отправки заказа");
+      return;
+    }
 
     // Показываем статус
     document.getElementById("info").innerHTML = 
@@ -565,7 +558,14 @@
     tg.sendData(JSON.stringify({ action: 'reject_order', order_id: orderId }));
   }
 
-  // Обновление списка заказов от бота
+  // Функции, вызываемые из бота
+  window.setAdminStatus = function(admin) {
+    isAdmin = admin;
+    if (isAdmin) {
+      document.getElementById('adminBtn').style.display = 'flex';
+    }
+  };
+
   window.updateOrdersList = function(orders) {
     const ordersList = document.getElementById('ordersList');
     const pendingOrders = orders.filter(o => o.status === 'pending');
@@ -593,13 +593,12 @@
     `).join('');
   };
 
-  // Обновление статуса заказа
   window.updateOrderStatus = function(orderId, status, message) {
     if (currentOrderId == orderId) {
       const statusText = status === 'completed' ? 'ПОДТВЕРЖДЁН' : 'ОТКЛОНЁН';
       const statusColor = status === 'completed' ? '#22c55e' : '#ef4444';
-      document.getElementById("info").innerHTML = 
-        document.getElementById("info").innerHTML + 
+      const currentInfo = document.getElementById("info").innerHTML;
+      document.getElementById("info").innerHTML = currentInfo + 
         `<br><br><span style="color: ${statusColor}; font-weight: bold;">${statusText}</span><br>${message}`;
     }
     showError(message);
@@ -648,10 +647,16 @@
     }
   }
 
+  // Проверка админа при загрузке
+  function checkAdmin() {
+    tg.sendData(JSON.stringify({ action: 'check_admin', user_id: currentUser.id }));
+  }
+
   window.addEventListener('load', () => {
     setTimeout(createRainOfKeys, 100);
-    checkAdminStatus();
+    checkAdmin();
     console.log('EGH SHOP загружен');
+    console.log('Пользователь:', currentUser);
   });
 </script>
 
