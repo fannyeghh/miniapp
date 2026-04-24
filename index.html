@@ -513,19 +513,10 @@
   // Показываем кнопку админа
   if (isAdmin) {
     document.getElementById('adminBtn').style.display = 'flex';
-    // Загружаем заказы при старте
-    setTimeout(() => {
-      if (document.getElementById('adminModal').classList.contains('active')) {
-        loadOrders();
-      }
-    }, 500);
   }
 
   function goBackToHome() {
     openPage('home');
-    // Очищаем форму
-    document.getElementById("login").value = "";
-    document.getElementById("amount").value = "";
   }
 
   function openPage(id) {
@@ -535,27 +526,28 @@
 
   function pay() {
     const login = document.getElementById("login").value.trim();
-    const amount = document.getElementById("amount").value.trim();
+    const amountRaw = document.getElementById("amount").value.trim();
 
     if (!login) {
       showError("❌ Введите логин Steam");
       return;
     }
-    if (!amount || amount <= 0) {
+    if (!amountRaw || amountRaw <= 0) {
       showError("❌ Введите сумму");
       return;
     }
 
+    const amount = parseFloat(amountRaw);
     currentOrderId = Date.now();
 
     const orderData = {
       action: 'new_order',
       order_id: currentOrderId,
       login: login,
-      amount: parseFloat(amount),
+      amount: amount,
       currency: currency,
       symbol: symbol,
-      user_id: currentUser.id,
+      user_id: currentUser.id || 0,
       username: currentUser.username || currentUser.first_name || 'Пользователь',
       timestamp: new Date().toLocaleString(),
       status: 'pending'
@@ -565,8 +557,17 @@
     localOrders[currentOrderId] = orderData;
     localStorage.setItem('egh_orders', JSON.stringify(localOrders));
 
-    // Отправляем боту
-    tg.sendData(JSON.stringify(orderData));
+    // ОТПРАВЛЯЕМ ДАННЫЕ БОТУ через WebApp
+    try {
+      const jsonData = JSON.stringify(orderData);
+      console.log("Отправляем данные:", jsonData);
+      tg.sendData(jsonData);
+      console.log("Данные отправлены успешно");
+    } catch (e) {
+      console.error("Ошибка отправки:", e);
+      showError("Ошибка отправки заказа");
+      return;
+    }
 
     // Показываем информацию на странице оплаты
     document.getElementById("info").innerHTML = 
@@ -577,6 +578,13 @@
       `<br>💰 После оплаты нажмите "Подтвердить" в админ-панели`;
 
     openPage('pay');
+    
+    // Показываем уведомление об успехе
+    tg.showPopup({
+      title: "Заказ создан",
+      message: `Ваш заказ на ${amount} ${symbol} отправлен!`,
+      buttons: [{type: "ok"}]
+    });
   }
 
   function toggleDropdown() {
@@ -598,7 +606,7 @@
     setTimeout(() => {
       div.style.opacity = '0';
       setTimeout(() => div.remove(), 300);
-    }, 2500);
+    }, 3000);
   }
 
   // ========== АДМИН-ПАНЕЛЬ ==========
@@ -653,10 +661,14 @@
     localStorage.setItem('egh_orders', JSON.stringify(localOrders));
     
     // Отправляем уведомление боту
-    tg.sendData(JSON.stringify({
-      action: 'approve_order',
-      order_id: orderId
-    }));
+    try {
+      tg.sendData(JSON.stringify({
+        action: 'approve_order',
+        order_id: orderId
+      }));
+    } catch(e) {
+      console.error(e);
+    }
     
     // Обновляем отображение
     loadOrders();
@@ -684,10 +696,14 @@
     localStorage.setItem('egh_orders', JSON.stringify(localOrders));
     
     // Отправляем уведомление боту
-    tg.sendData(JSON.stringify({
-      action: 'reject_order',
-      order_id: orderId
-    }));
+    try {
+      tg.sendData(JSON.stringify({
+        action: 'reject_order',
+        order_id: orderId
+      }));
+    } catch(e) {
+      console.error(e);
+    }
     
     // Обновляем отображение
     loadOrders();
@@ -703,39 +719,6 @@
         `<br>Средства возвращены на баланс.`;
     }
   }
-
-  // Обработка ответов от бота
-  window.updateOrdersList = function(orders) {
-    // Синхронизируем с ботом
-    if (orders && Array.isArray(orders)) {
-      orders.forEach(order => {
-        if (!localOrders[order.order_id]) {
-          localOrders[order.order_id] = order;
-        }
-      });
-      localStorage.setItem('egf_orders', JSON.stringify(localOrders));
-    }
-    loadOrders();
-  };
-
-  window.updateOrderStatus = function(orderId, status, message, amount, symbol) {
-    if (localOrders[orderId]) {
-      localOrders[orderId].status = status;
-      localStorage.setItem('egf_orders', JSON.stringify(localOrders));
-    }
-    
-    if (currentOrderId == orderId) {
-      const statusText = status === 'completed' ? 'ПОДТВЕРЖДЁН' : 'ОТКЛОНЁН';
-      const statusColor = status === 'completed' ? '#22c55e' : '#ef4444';
-      document.getElementById("info").innerHTML = 
-        `🧑 Покупатель: @${localOrders[orderId]?.username || 'Пользователь'}<br>` +
-        `🎮 Логин: ${localOrders[orderId]?.login || ''}<br>` +
-        `💰 Сумма: ${amount || ''} ${symbol || ''}<br>` +
-        `<br>${status === 'completed' ? '✅' : '❌'} <span style="color: ${statusColor}; font-weight: bold;">ЗАКАЗ ${statusText}</span><br>` +
-        `<br>${message || ''}`;
-    }
-    showError(message);
-  };
 
   // Закрытие дропдауна
   document.addEventListener("click", function(e) {
@@ -802,12 +785,10 @@
 
   window.addEventListener('load', () => {
     setTimeout(createRainOfKeys, 100);
-    // Очищаем старые заказы при загрузке (опционально)
-    // localStorage.clear(); // раскомментировать для очистки
+    console.log('✅ EGH SHOP загружен');
+    console.log('👤 Пользователь:', currentUser);
+    console.log('👑 Админ:', isAdmin ? 'ДА' : 'НЕТ');
   });
-
-  console.log('✅ EGH SHOP загружен');
-  console.log(`👑 Админ: ${isAdmin ? 'ДА' : 'НЕТ'}`);
 </script>
 
 </body>
