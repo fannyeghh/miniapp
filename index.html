@@ -1,71 +1,133 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EGH SHOP</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EGH SHOP</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-<style>
-body {
-  margin: 0;
-  font-family: 'Nunito', sans-serif;
-  color: #e5e7eb;
-  overflow: hidden;
-  background: #020617;
-}
+  <style>
+    * { box-sizing: border-box; }
 
-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: -1;
-}
+    body {
+      margin: 0;
+      font-family: 'Nunito', sans-serif;
+      color: white;
+      overflow-x: hidden;
+      background: #020617;
+    }
 
-.banner {
-  text-align: center;
-  padding: 25px;
-  font-size: 28px;
-  font-weight: 800;
-}
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
 
-.page {
-  display: none;
-  max-width: 420px;
-  margin: auto;
-  padding: 20px;
-}
+    .banner {
+      width: 100%;
+      text-align: center;
+      padding: 30px;
+      font-size: 26px;
+      font-weight: 800;
+    }
 
-.active { display: block; }
+    .page {
+      display: none;
+      max-width: 420px;
+      margin: auto;
+      padding: 20px;
+    }
 
-.card {
-  background: rgba(15,23,42,0.7);
-  padding: 20px;
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
-}
+    .active { display: block; }
 
-input {
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #334155;
-  background: #020617;
-  color: white;
-}
+    .card {
+      background: rgba(15,23,42,0.7);
+      padding: 20px;
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
 
-.btn {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  background: linear-gradient(90deg,#38bdf8,#60a5fa);
-  font-weight: 800;
-}
-</style>
+    input {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      background: #020617;
+      color: white;
+    }
+
+    .btn {
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 800;
+      background: linear-gradient(90deg,#38bdf8,#60a5fa);
+      color: black;
+      cursor: pointer;
+    }
+
+    .dropdown { position: relative; }
+
+    .selected {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      background: #020617;
+      cursor: pointer;
+    }
+
+    .options {
+      position: absolute;
+      width: 100%;
+      background: #020617;
+      border-radius: 10px;
+      overflow: hidden;
+      max-height: 0;
+      transition: 0.3s;
+    }
+
+    .dropdown.active .options {
+      max-height: 150px;
+    }
+
+    .option {
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .option:hover {
+      background: rgba(56,189,248,0.2);
+    }
+
+    .qr {
+      width: 200px;
+      height: 200px;
+      background: white;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: black;
+    }
+
+    .info {
+      margin-top: 10px;
+      color: #94a3b8;
+      text-align: center;
+      white-space: pre-line;
+    }
+
+    .back {
+      margin-top: 20px;
+      cursor: pointer;
+      color: #94a3b8;
+    }
+  </style>
 </head>
 
 <body>
@@ -74,91 +136,140 @@ input {
 
 <div class="banner">EGH SHOP</div>
 
+<!-- 🏠 -->
 <div class="page active" id="home">
+  <h1>Пополнение Steam</h1>
+
   <div class="card">
     <input id="login" placeholder="Логин Steam">
     <input id="amount" type="number" placeholder="Сумма">
-    <button class="btn" onclick="pay()">Оплатить</button>
+
+    <div class="dropdown" id="dropdown">
+      <div class="selected" onclick="toggleDropdown()">RUB ₽</div>
+      <div class="options">
+        <div class="option" onclick="selectCurrency('RUB','₽')">RUB ₽</div>
+        <div class="option" onclick="selectCurrency('KZT','₸')">KZT ₸</div>
+      </div>
+    </div>
+
+    <button class="btn" onclick="goToPayment()">Оплата</button>
   </div>
 </div>
 
+<!-- 💳 -->
+<div class="page" id="pay">
+  <h1>Оплата</h1>
+
+  <div class="qr">QR</div>
+  <div class="info" id="info"></div>
+
+  <div class="back" onclick="openPage('home')">← Назад</div>
+</div>
+
 <script>
+const tg = window.Telegram.WebApp;
+tg.expand();
+
+/* --- страницы --- */
+function openPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* --- валюта --- */
+let currency = "RUB";
+let symbol = "₽";
+
+function toggleDropdown() {
+  document.getElementById("dropdown").classList.toggle("active");
+}
+
+function selectCurrency(cur, sym) {
+  currency = cur;
+  symbol = sym;
+  document.querySelector(".selected").innerText = cur + " " + sym;
+  document.getElementById("dropdown").classList.remove("active");
+}
+
+/* --- оплата --- */
+function goToPayment() {
+  const login = document.getElementById("login").value.trim();
+  const amount = document.getElementById("amount").value.trim();
+
+  if (!login || !amount || amount <= 0) {
+    alert("Заполни все поля");
+    return;
+  }
+
+  document.getElementById("info").innerText =
+    `Логин: ${login}\nСумма: ${amount} ${symbol}`;
+
+  tg.sendData(JSON.stringify({login, amount, currency}));
+
+  openPage('pay');
+}
+
+/* --- фон (fluid) --- */
 const canvas = document.getElementById("bg");
 const ctx = canvas.getContext("2d");
 
-let w, h;
-function resize() {
-  w = canvas.width = window.innerWidth;
-  h = canvas.height = window.innerHeight;
+let w,h;
+function resize(){
+  w=canvas.width=window.innerWidth;
+  h=canvas.height=window.innerHeight;
 }
 resize();
-window.addEventListener("resize", resize);
+window.addEventListener("resize",resize);
 
-let particles = [];
+let particles=[];
 
-for (let i = 0; i < 40; i++) {
+for(let i=0;i<40;i++){
   particles.push({
-    x: Math.random() * w,
-    y: Math.random() * h,
-    vx: (Math.random() - 0.5) * 2,
-    vy: (Math.random() - 0.5) * 2,
-    size: Math.random() * 200 + 100
+    x:Math.random()*w,
+    y:Math.random()*h,
+    vx:(Math.random()-0.5)*2,
+    vy:(Math.random()-0.5)*2,
+    size:Math.random()*200+100
   });
 }
 
-function draw() {
-  ctx.clearRect(0, 0, w, h);
+function draw(){
+  ctx.clearRect(0,0,w,h);
 
-  for (let p of particles) {
-    p.x += p.vx;
-    p.y += p.vy;
+  for(let p of particles){
+    p.x+=p.vx;
+    p.y+=p.vy;
 
-    if (p.x < 0 || p.x > w) p.vx *= -1;
-    if (p.y < 0 || p.y > h) p.vy *= -1;
+    if(p.x<0||p.x>w) p.vx*=-1;
+    if(p.y<0||p.y>h) p.vy*=-1;
 
-    const gradient = ctx.createRadialGradient(
-      p.x, p.y, 0,
-      p.x, p.y, p.size
-    );
+    let g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.size);
+    g.addColorStop(0,"rgba(56,189,248,0.25)");
+    g.addColorStop(0.5,"rgba(14,165,233,0.15)");
+    g.addColorStop(1,"transparent");
 
-    gradient.addColorStop(0, "rgba(56,189,248,0.25)");
-    gradient.addColorStop(0.5, "rgba(14,165,233,0.15)");
-    gradient.addColorStop(1, "transparent");
-
-    ctx.fillStyle = gradient;
+    ctx.fillStyle=g;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
     ctx.fill();
   }
 
   requestAnimationFrame(draw);
 }
-
 draw();
 
-/* 💥 РЕАКЦИЯ НА КАСАНИЕ */
-window.addEventListener("mousemove", (e) => {
+/* реакция */
+window.addEventListener("mousemove",e=>{
   particles.push({
-    x: e.clientX,
-    y: e.clientY,
-    vx: (Math.random() - 0.5) * 4,
-    vy: (Math.random() - 0.5) * 4,
-    size: 150
+    x:e.clientX,
+    y:e.clientY,
+    vx:(Math.random()-0.5)*4,
+    vy:(Math.random()-0.5)*4,
+    size:150
   });
 
-  if (particles.length > 60) particles.shift();
+  if(particles.length>60) particles.shift();
 });
-
-/* Telegram */
-const tg = window.Telegram.WebApp;
-tg.expand();
-
-function pay() {
-  const login = document.getElementById("login").value;
-  const amount = document.getElementById("amount").value;
-
-  tg.sendData(JSON.stringify({login, amount}));
-}
 </script>
 
 </body>
