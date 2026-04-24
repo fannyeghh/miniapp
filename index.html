@@ -6,10 +6,7 @@
 
   <title>EGH SHOP - Пополнение Steam</title>
 
-  <!-- ШРИФТ -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
-
-  <!-- Telegram WebApp -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
@@ -17,7 +14,6 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -39,7 +35,6 @@
       100% { background-position: 0% 50%; }
     }
 
-    /* Дождь из ключей */
     .rain-key {
       position: fixed;
       pointer-events: none;
@@ -55,7 +50,6 @@
       filter: drop-shadow(0 0 5px rgba(56,189,248,0.4));
     }
 
-    /* Кнопка админ-панели */
     .admin-btn {
       position: fixed;
       top: 70px;
@@ -78,10 +72,8 @@
 
     .admin-btn:hover {
       transform: scale(1.1);
-      box-shadow: 0 0 25px rgba(56, 189, 248, 0.6);
     }
 
-    /* Модальное окно админ-панели */
     .admin-modal {
       display: none;
       position: fixed;
@@ -105,7 +97,6 @@
       border-radius: 24px;
       padding: 20px;
       border: 1px solid rgba(56, 189, 248, 0.3);
-      box-shadow: 0 0 40px rgba(0,0,0,0.5);
     }
 
     .admin-modal-header {
@@ -128,17 +119,6 @@
       color: #fff;
       font-size: 28px;
       cursor: pointer;
-      width: 35px;
-      height: 35px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      transition: 0.2s;
-    }
-
-    .close-modal:hover {
-      background: rgba(255,255,255,0.1);
     }
 
     .order-card {
@@ -173,7 +153,6 @@
       border-radius: 10px;
       cursor: pointer;
       font-weight: bold;
-      font-size: 14px;
       flex: 1;
     }
 
@@ -185,7 +164,6 @@
       border-radius: 10px;
       cursor: pointer;
       font-weight: bold;
-      font-size: 14px;
       flex: 1;
     }
 
@@ -201,7 +179,6 @@
     .status-completed { background: #22c55e; color: #fff; }
     .status-rejected { background: #ef4444; color: #fff; }
 
-    /* БАННЕР */
     .banner {
       width: 100%;
       text-align: center;
@@ -217,7 +194,6 @@
       z-index: 10;
     }
 
-    /* Страницы */
     .page {
       display: none;
       width: 100%;
@@ -233,13 +209,6 @@
       display: flex;
     }
 
-    h1 {
-      font-weight: 800;
-      letter-spacing: 1px;
-      text-shadow: 0 0 8px rgba(255,255,255,0.15);
-    }
-
-    /* Картинка Steam */
     .steam-image {
       text-align: center;
       margin: 20px 0 10px 0;
@@ -250,14 +219,8 @@
       height: auto;
       border-radius: 16px;
       box-shadow: 0 0 20px rgba(56,189,248,0.3);
-      transition: transform 0.3s ease;
     }
 
-    .steam-image img:hover {
-      transform: scale(1.02);
-    }
-
-    /* Карточка */
     .card {
       width: 100%;
       background: rgba(30, 41, 59, 0.6);
@@ -267,7 +230,6 @@
       flex-direction: column;
       gap: 12px;
       border: 1px solid rgba(56,189,248,0.15);
-      box-shadow: 0 0 20px rgba(56,189,248,0.05);
       backdrop-filter: blur(10px);
     }
 
@@ -283,7 +245,6 @@
 
     input:focus {
       border-color: #38bdf8;
-      box-shadow: 0 0 12px rgba(56,189,248,0.25);
       outline: none;
     }
 
@@ -296,7 +257,6 @@
       margin: 0;
     }
 
-    /* ДРОПДАУН */
     .dropdown {
       position: relative;
       width: 100%;
@@ -313,7 +273,6 @@
       align-items: center;
       color: #e5e7eb;
       font-weight: 600;
-      text-shadow: 0 0 8px rgba(56,189,248,0.2);
     }
 
     .selected::after {
@@ -370,10 +329,6 @@
       transform: translateY(-2px);
     }
 
-    .btn:active {
-      transform: translateY(0);
-    }
-
     .qr {
       width: 200px;
       height: 200px;
@@ -391,7 +346,6 @@
       margin-top: 10px;
       color: #94a3b8;
       text-align: center;
-      white-space: pre-line;
       background: rgba(0,0,0,0.3);
       padding: 15px;
       border-radius: 12px;
@@ -403,7 +357,6 @@
       color: #94a3b8;
       text-align: center;
       padding: 10px;
-      transition: 0.15s;
     }
 
     .back:hover {
@@ -434,7 +387,6 @@
       }
     }
 
-    /* Адаптив */
     @media (max-width: 480px) {
       .banner { font-size: 22px; padding: 20px; }
       .steam-image img { max-width: 85%; }
@@ -445,12 +397,10 @@
 
 <body>
 
-<!-- Кнопка админ-панели -->
 <div id="adminBtn" class="admin-btn" style="display: none;" onclick="openAdminPanel()">
   👑
 </div>
 
-<!-- Модалка админ-панели -->
 <div id="adminModal" class="admin-modal">
   <div class="admin-modal-content">
     <div class="admin-modal-header">
@@ -458,7 +408,7 @@
       <button class="close-modal" onclick="closeAdminPanel()">×</button>
     </div>
     <div id="ordersList">
-      <div class="loading">Загрузка заказов...</div>
+      <div style="text-align: center; padding: 40px;">Загрузка...</div>
     </div>
   </div>
 </div>
@@ -490,7 +440,7 @@
   <h1>Оплата</h1>
   <div class="qr">QR CODE</div>
   <div class="info" id="info"></div>
-  <div class="back" onclick="goBackToHome()">← Назад</div>
+  <div class="back" onclick="goBack()">← Назад</div>
 </div>
 
 <script>
@@ -500,22 +450,26 @@
 
   let currency = "RUB";
   let symbol = "₽";
-  
-  // Текущий пользователь
-  const currentUser = tg.initDataUnsafe?.user || {};
-  const ADMIN_ID = 1641610032;
-  const isAdmin = currentUser && currentUser.id === ADMIN_ID;
-
-  // Хранилище заказов на клиенте
-  let localOrders = JSON.parse(localStorage.getItem('egh_orders') || '{}');
   let currentOrderId = null;
+  let isAdmin = false;
+  
+  const currentUser = tg.initDataUnsafe?.user || {};
 
-  // Показываем кнопку админа
-  if (isAdmin) {
-    document.getElementById('adminBtn').style.display = 'flex';
+  // Проверка админа через бота
+  function checkAdminStatus() {
+    tg.sendData(JSON.stringify({ action: 'check_admin', user_id: currentUser.id }));
   }
 
-  function goBackToHome() {
+  // Вызывается из бота
+  window.setAdminStatus = function(admin) {
+    isAdmin = admin;
+    if (isAdmin) {
+      document.getElementById('adminBtn').style.display = 'flex';
+      loadOrders();
+    }
+  };
+
+  function goBack() {
     openPage('home');
   }
 
@@ -529,11 +483,11 @@
     const amountRaw = document.getElementById("amount").value.trim();
 
     if (!login) {
-      showError("❌ Введите логин Steam");
+      showError("Введите логин Steam");
       return;
     }
     if (!amountRaw || amountRaw <= 0) {
-      showError("❌ Введите сумму");
+      showError("Введите сумму");
       return;
     }
 
@@ -553,38 +507,17 @@
       status: 'pending'
     };
 
-    // Сохраняем локально
-    localOrders[currentOrderId] = orderData;
-    localStorage.setItem('egh_orders', JSON.stringify(localOrders));
+    // Отправляем боту
+    tg.sendData(JSON.stringify(orderData));
 
-    // ОТПРАВЛЯЕМ ДАННЫЕ БОТУ через WebApp
-    try {
-      const jsonData = JSON.stringify(orderData);
-      console.log("Отправляем данные:", jsonData);
-      tg.sendData(jsonData);
-      console.log("Данные отправлены успешно");
-    } catch (e) {
-      console.error("Ошибка отправки:", e);
-      showError("Ошибка отправки заказа");
-      return;
-    }
-
-    // Показываем информацию на странице оплаты
+    // Показываем статус
     document.getElementById("info").innerHTML = 
       `🧑 Покупатель: @${orderData.username}<br>` +
       `🎮 Логин: ${login}<br>` +
-      `💵 Сумма: ${amount} ${symbol}<br>` +
-      `<br>🟡 Статус: <span style="color: #f59e0b;">Ожидает подтверждения</span><br>` +
-      `<br>💰 После оплаты нажмите "Подтвердить" в админ-панели`;
+      `💵 Сумма: ${amount} ${symbol}<br><br>` +
+      `🟡 Статус: Ожидает подтверждения`;
 
     openPage('pay');
-    
-    // Показываем уведомление об успехе
-    tg.showPopup({
-      title: "Заказ создан",
-      message: `Ваш заказ на ${amount} ${symbol} отправлен!`,
-      buttons: [{type: "ok"}]
-    });
   }
 
   function toggleDropdown() {
@@ -606,10 +539,10 @@
     setTimeout(() => {
       div.style.opacity = '0';
       setTimeout(() => div.remove(), 300);
-    }, 3000);
+    }, 2500);
   }
 
-  // ========== АДМИН-ПАНЕЛЬ ==========
+  // Админ-панель
   function openAdminPanel() {
     if (!isAdmin) return;
     document.getElementById('adminModal').classList.add('active');
@@ -621,106 +554,57 @@
   }
 
   function loadOrders() {
+    tg.sendData(JSON.stringify({ action: 'get_orders' }));
+  }
+
+  function approveOrder(orderId) {
+    tg.sendData(JSON.stringify({ action: 'approve_order', order_id: orderId }));
+  }
+
+  function rejectOrder(orderId) {
+    tg.sendData(JSON.stringify({ action: 'reject_order', order_id: orderId }));
+  }
+
+  // Обновление списка заказов от бота
+  window.updateOrdersList = function(orders) {
     const ordersList = document.getElementById('ordersList');
-    
-    // Получаем заказы из localStorage
-    const pendingOrders = Object.values(localOrders).filter(order => order.status === 'pending');
+    const pendingOrders = orders.filter(o => o.status === 'pending');
     
     if (pendingOrders.length === 0) {
-      ordersList.innerHTML = '<div style="text-align: center; padding: 40px;">📭 Нет активных заказов</div>';
+      ordersList.innerHTML = '<div style="text-align: center; padding: 40px;">Нет активных заказов</div>';
       return;
     }
 
     ordersList.innerHTML = pendingOrders.map(order => `
       <div class="order-card" id="order_${order.order_id}">
         <div class="order-info">
-          <p><strong>🆔 Заказ:</strong> #${order.order_id}</p>
-          <p><strong>👤 Покупатель:</strong> @${order.username}</p>
-          <p><strong>🎮 Логин Steam:</strong> ${order.login}</p>
-          <p><strong>💰 Сумма:</strong> ${order.amount} ${order.symbol}</p>
-          <p><strong>💱 Валюта:</strong> ${order.currency}</p>
-          <p><strong>📅 Время:</strong> ${order.timestamp}</p>
-          <p><strong>📊 Статус:</strong> <span class="order-status status-pending">⏳ Ожидает</span></p>
+          <p><strong>Заказ:</strong> #${order.order_id}</p>
+          <p><strong>Покупатель:</strong> @${order.username}</p>
+          <p><strong>Логин Steam:</strong> ${order.login}</p>
+          <p><strong>Сумма:</strong> ${order.amount} ${order.symbol}</p>
+          <p><strong>Валюта:</strong> ${order.currency}</p>
+          <p><strong>Время:</strong> ${order.timestamp}</p>
         </div>
         <div class="order-actions">
-          <button class="confirm-btn" onclick="approveOrderLocally('${order.order_id}')">✅ Подтвердить</button>
-          <button class="reject-btn" onclick="rejectOrderLocally('${order.order_id}')">❌ Отклонить</button>
+          <button class="confirm-btn" onclick="approveOrder('${order.order_id}')">✅ Подтвердить</button>
+          <button class="reject-btn" onclick="rejectOrder('${order.order_id}')">❌ Отклонить</button>
         </div>
       </div>
     `).join('');
-  }
+  };
 
-  function approveOrderLocally(orderId) {
-    const order = localOrders[orderId];
-    if (!order) {
-      showError("Заказ не найден");
-      return;
-    }
-    
-    order.status = 'completed';
-    localStorage.setItem('egh_orders', JSON.stringify(localOrders));
-    
-    // Отправляем уведомление боту
-    try {
-      tg.sendData(JSON.stringify({
-        action: 'approve_order',
-        order_id: orderId
-      }));
-    } catch(e) {
-      console.error(e);
-    }
-    
-    // Обновляем отображение
-    loadOrders();
-    showError(`✅ Заказ #${orderId} подтверждён!`);
-    
-    // Если это текущий заказ пользователя
+  // Обновление статуса заказа
+  window.updateOrderStatus = function(orderId, status, message) {
     if (currentOrderId == orderId) {
+      const statusText = status === 'completed' ? 'ПОДТВЕРЖДЁН' : 'ОТКЛОНЁН';
+      const statusColor = status === 'completed' ? '#22c55e' : '#ef4444';
       document.getElementById("info").innerHTML = 
-        `🧑 Покупатель: @${order.username}<br>` +
-        `🎮 Логин: ${order.login}<br>` +
-        `💰 Сумма: ${order.amount} ${order.symbol}<br>` +
-        `<br>✅ <span style="color: #22c55e; font-weight: bold;">ЗАКАЗ ПОДТВЕРЖДЁН!</span><br>` +
-        `<br>🎉 Спасибо за покупку!`;
+        document.getElementById("info").innerHTML + 
+        `<br><br><span style="color: ${statusColor}; font-weight: bold;">${statusText}</span><br>${message}`;
     }
-  }
+    showError(message);
+  };
 
-  function rejectOrderLocally(orderId) {
-    const order = localOrders[orderId];
-    if (!order) {
-      showError("Заказ не найден");
-      return;
-    }
-    
-    order.status = 'rejected';
-    localStorage.setItem('egh_orders', JSON.stringify(localOrders));
-    
-    // Отправляем уведомление боту
-    try {
-      tg.sendData(JSON.stringify({
-        action: 'reject_order',
-        order_id: orderId
-      }));
-    } catch(e) {
-      console.error(e);
-    }
-    
-    // Обновляем отображение
-    loadOrders();
-    showError(`❌ Заказ #${orderId} отклонён!`);
-    
-    // Если это текущий заказ пользователя
-    if (currentOrderId == orderId) {
-      document.getElementById("info").innerHTML = 
-        `🧑 Покупатель: @${order.username}<br>` +
-        `🎮 Логин: ${order.login}<br>` +
-        `💰 Сумма: ${order.amount} ${order.symbol}<br>` +
-        `<br>❌ <span style="color: #ef4444; font-weight: bold;">ЗАКАЗ ОТКЛОНЁН</span><br>` +
-        `<br>Средства возвращены на баланс.`;
-    }
-  }
-
-  // Закрытие дропдауна
   document.addEventListener("click", function(e) {
     const dropdown = document.getElementById("dropdown");
     if (dropdown && !dropdown.contains(e.target)) {
@@ -728,66 +612,46 @@
     }
   });
 
-  // Enter для отправки
   document.addEventListener("keypress", function(e) {
     if (e.key === "Enter" && document.getElementById("home").classList.contains("active")) {
       pay();
     }
   });
 
-  // Запрет перетаскивания
   document.addEventListener('dragstart', (e) => e.preventDefault());
 
   // Дождь из ключей
   function createRainOfKeys() {
-    const keyCount = 35;
+    const keyCount = 30;
     for(let i = 0; i < keyCount; i++) {
       const keyDiv = document.createElement('div');
       keyDiv.className = 'rain-key';
       const img = document.createElement('img');
       img.src = 'key.png';
       img.draggable = false;
-      
-      img.onerror = () => {
-        keyDiv.innerHTML = '🔑';
-        keyDiv.style.fontSize = size + 'px';
-        keyDiv.style.display = 'flex';
-        keyDiv.style.alignItems = 'center';
-        keyDiv.style.justifyContent = 'center';
-      };
-      
+      img.onerror = () => { keyDiv.innerHTML = '🔑'; keyDiv.style.fontSize = '30px'; };
       keyDiv.appendChild(img);
       const size = Math.random() * 40 + 25;
       keyDiv.style.width = size + 'px';
       keyDiv.style.height = size + 'px';
       keyDiv.style.left = Math.random() * 100 + '%';
       keyDiv.style.top = '-10%';
-      
       const delay = Math.random() * 15;
       const duration = Math.random() * 5 + 4;
       const tilt = (Math.random() - 0.5) * 100;
-      
-      const animName = `rain_${i}`;
+      const anim = `@keyframes rain_${i}{0%{transform:translate(0,-10vh) rotate(0deg);opacity:0}10%{opacity:0.7}90%{opacity:0.7}100%{transform:translate(${tilt}px,110vh) rotate(360deg);opacity:0}}`;
       const style = document.createElement('style');
-      style.textContent = `
-        @keyframes ${animName} {
-          0% { transform: translate(0, -10vh) rotate(0deg); opacity: 0; }
-          10% { opacity: 0.7; }
-          90% { opacity: 0.7; }
-          100% { transform: translate(${tilt}px, 110vh) rotate(${Math.random() * 360}deg); opacity: 0; }
-        }
-      `;
+      style.textContent = anim;
       document.head.appendChild(style);
-      keyDiv.style.animation = `${animName} ${duration}s linear ${delay}s infinite`;
+      keyDiv.style.animation = `rain_${i} ${duration}s linear ${delay}s infinite`;
       document.body.appendChild(keyDiv);
     }
   }
 
   window.addEventListener('load', () => {
     setTimeout(createRainOfKeys, 100);
-    console.log('✅ EGH SHOP загружен');
-    console.log('👤 Пользователь:', currentUser);
-    console.log('👑 Админ:', isAdmin ? 'ДА' : 'НЕТ');
+    checkAdminStatus();
+    console.log('EGH SHOP загружен');
   });
 </script>
 
