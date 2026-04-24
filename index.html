@@ -201,7 +201,7 @@
     .status-completed { background: #22c55e; color: #fff; }
     .status-rejected { background: #ef4444; color: #fff; }
 
-    /* БАННЕР - как было */
+    /* БАННЕР */
     .banner {
       width: 100%;
       text-align: center;
@@ -296,7 +296,7 @@
       margin: 0;
     }
 
-    /* ДРОПДАУН - такой же стиль как баннер */
+    /* ДРОПДАУН */
     .dropdown {
       position: relative;
       width: 100%;
@@ -490,7 +490,7 @@
   <h1>Оплата</h1>
   <div class="qr">QR CODE</div>
   <div class="info" id="info"></div>
-  <div class="back" onclick="openPage('home')">← Назад</div>
+  <div class="back" onclick="goBackToHome()">← Назад</div>
 </div>
 
 <script>
@@ -506,12 +506,27 @@
   const ADMIN_ID = 1641610032;
   const isAdmin = currentUser && currentUser.id === ADMIN_ID;
 
+  // Хранилище заказов на клиенте
+  let localOrders = JSON.parse(localStorage.getItem('egh_orders') || '{}');
+  let currentOrderId = null;
+
   // Показываем кнопку админа
   if (isAdmin) {
     document.getElementById('adminBtn').style.display = 'flex';
+    // Загружаем заказы при старте
+    setTimeout(() => {
+      if (document.getElementById('adminModal').classList.contains('active')) {
+        loadOrders();
+      }
+    }, 500);
   }
 
-  let currentOrderId = null;
+  function goBackToHome() {
+    openPage('home');
+    // Очищаем форму
+    document.getElementById("login").value = "";
+    document.getElementById("amount").value = "";
+  }
 
   function openPage(id) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -522,8 +537,12 @@
     const login = document.getElementById("login").value.trim();
     const amount = document.getElementById("amount").value.trim();
 
-    if (!login || !amount || amount <= 0) {
-      showError("Проверь данные");
+    if (!login) {
+      showError("❌ Введите логин Steam");
+      return;
+    }
+    if (!amount || amount <= 0) {
+      showError("❌ Введите сумму");
       return;
     }
 
@@ -542,10 +561,20 @@
       status: 'pending'
     };
 
+    // Сохраняем локально
+    localOrders[currentOrderId] = orderData;
+    localStorage.setItem('egh_orders', JSON.stringify(localOrders));
+
+    // Отправляем боту
     tg.sendData(JSON.stringify(orderData));
 
-    document.getElementById("info").innerText = 
-      `Логин: ${login}\nСумма: ${amount} ${symbol}\n\n⏳ Ожидает подтверждения`;
+    // Показываем информацию на странице оплаты
+    document.getElementById("info").innerHTML = 
+      `🧑 Покупатель: @${orderData.username}<br>` +
+      `🎮 Логин: ${login}<br>` +
+      `💵 Сумма: ${amount} ${symbol}<br>` +
+      `<br>🟡 Статус: <span style="color: #f59e0b;">Ожидает подтверждения</span><br>` +
+      `<br>💰 После оплаты нажмите "Подтвердить" в админ-панели`;
 
     openPage('pay');
   }
@@ -564,7 +593,7 @@
   function showError(text) {
     const div = document.createElement("div");
     div.className = "error";
-    div.innerText = "❌ " + text;
+    div.innerHTML = text;
     document.body.appendChild(div);
     setTimeout(() => {
       div.style.opacity = '0';
@@ -572,7 +601,7 @@
     }, 2500);
   }
 
-  // Админ-панель
+  // ========== АДМИН-ПАНЕЛЬ ==========
   function openAdminPanel() {
     if (!isAdmin) return;
     document.getElementById('adminModal').classList.add('active');
@@ -585,50 +614,125 @@
 
   function loadOrders() {
     const ordersList = document.getElementById('ordersList');
-    ordersList.innerHTML = '<div class="loading">Загрузка заказов...</div>';
-    tg.sendData(JSON.stringify({ action: 'get_orders' }));
-  }
-
-  function approveOrder(orderId) {
-    tg.sendData(JSON.stringify({ action: 'approve_order', order_id: orderId }));
-  }
-
-  function rejectOrder(orderId) {
-    tg.sendData(JSON.stringify({ action: 'reject_order', order_id: orderId }));
-  }
-
-  window.updateOrdersList = function(orders) {
-    const ordersList = document.getElementById('ordersList');
-    if (!orders || orders.length === 0) {
+    
+    // Получаем заказы из localStorage
+    const pendingOrders = Object.values(localOrders).filter(order => order.status === 'pending');
+    
+    if (pendingOrders.length === 0) {
       ordersList.innerHTML = '<div style="text-align: center; padding: 40px;">📭 Нет активных заказов</div>';
       return;
     }
 
-    ordersList.innerHTML = orders.map(order => `
-      <div class="order-card">
+    ordersList.innerHTML = pendingOrders.map(order => `
+      <div class="order-card" id="order_${order.order_id}">
         <div class="order-info">
           <p><strong>🆔 Заказ:</strong> #${order.order_id}</p>
           <p><strong>👤 Покупатель:</strong> @${order.username}</p>
           <p><strong>🎮 Логин Steam:</strong> ${order.login}</p>
-          <p><strong>💰 Сумма:</strong> ${order.amount} ${order.symbol || '₽'}</p>
+          <p><strong>💰 Сумма:</strong> ${order.amount} ${order.symbol}</p>
           <p><strong>💱 Валюта:</strong> ${order.currency}</p>
           <p><strong>📅 Время:</strong> ${order.timestamp}</p>
           <p><strong>📊 Статус:</strong> <span class="order-status status-pending">⏳ Ожидает</span></p>
         </div>
-        ${order.status === 'pending' ? `
-          <div class="order-actions">
-            <button class="confirm-btn" onclick="approveOrder('${order.order_id}')">✅ Подтвердить</button>
-            <button class="reject-btn" onclick="rejectOrder('${order.order_id}')">❌ Отклонить</button>
-          </div>
-        ` : ''}
+        <div class="order-actions">
+          <button class="confirm-btn" onclick="approveOrderLocally('${order.order_id}')">✅ Подтвердить</button>
+          <button class="reject-btn" onclick="rejectOrderLocally('${order.order_id}')">❌ Отклонить</button>
+        </div>
       </div>
     `).join('');
+  }
+
+  function approveOrderLocally(orderId) {
+    const order = localOrders[orderId];
+    if (!order) {
+      showError("Заказ не найден");
+      return;
+    }
+    
+    order.status = 'completed';
+    localStorage.setItem('egh_orders', JSON.stringify(localOrders));
+    
+    // Отправляем уведомление боту
+    tg.sendData(JSON.stringify({
+      action: 'approve_order',
+      order_id: orderId
+    }));
+    
+    // Обновляем отображение
+    loadOrders();
+    showError(`✅ Заказ #${orderId} подтверждён!`);
+    
+    // Если это текущий заказ пользователя
+    if (currentOrderId == orderId) {
+      document.getElementById("info").innerHTML = 
+        `🧑 Покупатель: @${order.username}<br>` +
+        `🎮 Логин: ${order.login}<br>` +
+        `💰 Сумма: ${order.amount} ${order.symbol}<br>` +
+        `<br>✅ <span style="color: #22c55e; font-weight: bold;">ЗАКАЗ ПОДТВЕРЖДЁН!</span><br>` +
+        `<br>🎉 Спасибо за покупку!`;
+    }
+  }
+
+  function rejectOrderLocally(orderId) {
+    const order = localOrders[orderId];
+    if (!order) {
+      showError("Заказ не найден");
+      return;
+    }
+    
+    order.status = 'rejected';
+    localStorage.setItem('egh_orders', JSON.stringify(localOrders));
+    
+    // Отправляем уведомление боту
+    tg.sendData(JSON.stringify({
+      action: 'reject_order',
+      order_id: orderId
+    }));
+    
+    // Обновляем отображение
+    loadOrders();
+    showError(`❌ Заказ #${orderId} отклонён!`);
+    
+    // Если это текущий заказ пользователя
+    if (currentOrderId == orderId) {
+      document.getElementById("info").innerHTML = 
+        `🧑 Покупатель: @${order.username}<br>` +
+        `🎮 Логин: ${order.login}<br>` +
+        `💰 Сумма: ${order.amount} ${order.symbol}<br>` +
+        `<br>❌ <span style="color: #ef4444; font-weight: bold;">ЗАКАЗ ОТКЛОНЁН</span><br>` +
+        `<br>Средства возвращены на баланс.`;
+    }
+  }
+
+  // Обработка ответов от бота
+  window.updateOrdersList = function(orders) {
+    // Синхронизируем с ботом
+    if (orders && Array.isArray(orders)) {
+      orders.forEach(order => {
+        if (!localOrders[order.order_id]) {
+          localOrders[order.order_id] = order;
+        }
+      });
+      localStorage.setItem('egf_orders', JSON.stringify(localOrders));
+    }
+    loadOrders();
   };
 
   window.updateOrderStatus = function(orderId, status, message, amount, symbol) {
+    if (localOrders[orderId]) {
+      localOrders[orderId].status = status;
+      localStorage.setItem('egf_orders', JSON.stringify(localOrders));
+    }
+    
     if (currentOrderId == orderId) {
-      document.getElementById("info").innerText = 
-        `Логин: ${login}\nСумма: ${amount} ${symbol}\n\n${message}`;
+      const statusText = status === 'completed' ? 'ПОДТВЕРЖДЁН' : 'ОТКЛОНЁН';
+      const statusColor = status === 'completed' ? '#22c55e' : '#ef4444';
+      document.getElementById("info").innerHTML = 
+        `🧑 Покупатель: @${localOrders[orderId]?.username || 'Пользователь'}<br>` +
+        `🎮 Логин: ${localOrders[orderId]?.login || ''}<br>` +
+        `💰 Сумма: ${amount || ''} ${symbol || ''}<br>` +
+        `<br>${status === 'completed' ? '✅' : '❌'} <span style="color: ${statusColor}; font-weight: bold;">ЗАКАЗ ${statusText}</span><br>` +
+        `<br>${message || ''}`;
     }
     showError(message);
   };
@@ -698,9 +802,12 @@
 
   window.addEventListener('load', () => {
     setTimeout(createRainOfKeys, 100);
+    // Очищаем старые заказы при загрузке (опционально)
+    // localStorage.clear(); // раскомментировать для очистки
   });
 
   console.log('✅ EGH SHOP загружен');
+  console.log(`👑 Админ: ${isAdmin ? 'ДА' : 'НЕТ'}`);
 </script>
 
 </body>
