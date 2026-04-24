@@ -59,25 +59,35 @@
       border-bottom: 1px solid rgba(56,189,248,0.15);
     }
 
+    /* Стиль для картинки */
+    .steam-image {
+      text-align: center;
+      margin: 20px 0 10px 0;
+    }
+
+    .steam-image img {
+      max-width: 90%;
+      height: auto;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(56,189,248,0.3);
+      transition: transform 0.3s ease;
+    }
+
+    .steam-image img:hover {
+      transform: scale(1.02);
+    }
+
     .page {
       display: none;
       width: 100%;
       max-width: 420px;
       flex-direction: column;
       align-items: center;
-      margin-top: 25px;
+      margin-top: 15px;
     }
 
     .active {
       display: flex;
-    }
-
-    h1 {
-      font-weight: 800;
-      letter-spacing: 1px;
-
-      text-shadow:
-        0 0 8px rgba(255,255,255,0.15);
     }
 
     .card {
@@ -103,6 +113,7 @@
       color: #e5e7eb;
 
       font-family: 'Nunito', sans-serif;
+      font-size: 16px;
     }
 
     input:focus {
@@ -120,6 +131,7 @@
 
       font-weight: 800;
       font-family: 'Nunito', sans-serif;
+      font-size: 16px;
 
       background: linear-gradient(90deg, #38bdf8, #60a5fa);
       color: #020617;
@@ -129,6 +141,10 @@
 
     .btn:hover {
       transform: translateY(-2px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
     }
 
     /* 💱 ДРОПДАУН */
@@ -143,12 +159,22 @@
       padding: 12px;
       border-radius: 12px;
       cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .selected::after {
+      content: "▼";
+      font-size: 12px;
+      color: #94a3b8;
     }
 
     .options {
       position: absolute;
       top: 110%;
       width: 100%;
+      z-index: 100;
 
       background: rgba(15, 23, 42, 0.98);
       border: 1px solid rgba(56,189,248,0.2);
@@ -169,6 +195,7 @@
     .option {
       padding: 12px;
       cursor: pointer;
+      transition: 0.15s;
     }
 
     .option:hover {
@@ -188,6 +215,7 @@
 
       color: black;
       font-weight: bold;
+      margin: 0 auto;
     }
 
     .info {
@@ -195,12 +223,22 @@
       color: #94a3b8;
       text-align: center;
       white-space: pre-line;
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      border-radius: 12px;
     }
 
     .back {
       margin-top: 20px;
       cursor: pointer;
       color: #94a3b8;
+      text-align: center;
+      padding: 10px;
+      transition: 0.15s;
+    }
+
+    .back:hover {
+      color: #38bdf8;
     }
 
     .error {
@@ -208,10 +246,37 @@
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
+      z-index: 1000;
 
-      background: rgba(239,68,68,0.9);
+      background: rgba(239,68,68,0.95);
       padding: 12px 18px;
       border-radius: 10px;
+      
+      font-weight: 600;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateX(-50%) translateY(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Адаптивность */
+    @media (max-width: 480px) {
+      .banner {
+        font-size: 22px;
+        padding: 20px;
+      }
+      
+      .steam-image img {
+        max-width: 85%;
+      }
     }
   </style>
 </head>
@@ -221,13 +286,15 @@
 <div class="banner">EGH SHOP</div>
 
 <div class="page active" id="home">
-
-  <h1>Пополнение Steam</h1>
+  
+  <!-- ВОТ ЗДЕСЬ ВАША КАРТИНКА! -->
+  <div class="steam-image">
+    <img src="image.png" alt="Steam Пополнение">
+  </div>
 
   <div class="card">
-
     <input id="login" placeholder="Логин Steam">
-    <input id="amount" type="number" placeholder="Сумма">
+    <input id="amount" type="number" placeholder="Сумма" step="1" min="1">
 
     <div class="dropdown" id="dropdown">
       <div class="selected" onclick="toggleDropdown()">RUB ₽</div>
@@ -238,7 +305,6 @@
     </div>
 
     <button class="btn" onclick="pay()">Оплатить</button>
-
   </div>
 </div>
 
@@ -273,40 +339,55 @@
       return;
     }
 
-    const data = { login, amount, currency };
+    const data = { 
+      login: login, 
+      amount: parseFloat(amount), 
+      currency: currency
+    };
 
     tg.sendData(JSON.stringify(data));
 
     document.getElementById("info").innerText =
-      `Логин: ${login}\nСумма: ${amount} ${symbol}`;
+      `🧑 Логин: ${login}\n💵 Сумма: ${amount} ${symbol}\n💱 Валюта: ${currency}`;
 
     openPage('pay');
   }
 
   function toggleDropdown() {
-    document.getElementById("dropdown").classList.toggle("active");
+    const dropdown = document.getElementById("dropdown");
+    dropdown.classList.toggle("active");
   }
 
   function selectCurrency(cur, sym) {
     currency = cur;
     symbol = sym;
 
-    document.querySelector(".selected").innerText = cur + " " + sym;
+    document.querySelector(".selected").innerHTML = `${cur} ${sym}`;
     document.getElementById("dropdown").classList.remove("active");
   }
 
   function showError(text) {
     const div = document.createElement("div");
     div.className = "error";
-    div.innerText = text;
+    div.innerText = "❌ " + text;
 
     document.body.appendChild(div);
-    setTimeout(() => div.remove(), 2000);
+    setTimeout(() => {
+      div.style.opacity = '0';
+      setTimeout(() => div.remove(), 300);
+    }, 2000);
   }
 
   document.addEventListener("click", function(e) {
-    if (!document.getElementById("dropdown").contains(e.target)) {
-      document.getElementById("dropdown").classList.remove("active");
+    const dropdown = document.getElementById("dropdown");
+    if (dropdown && !dropdown.contains(e.target)) {
+      dropdown.classList.remove("active");
+    }
+  });
+
+  document.addEventListener("keypress", function(e) {
+    if (e.key === "Enter" && document.getElementById("home").classList.contains("active")) {
+      pay();
     }
   });
 </script>
