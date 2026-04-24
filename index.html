@@ -1,21 +1,13 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>EGH SHOP - Пополнение Steam</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
     body {
       font-family: 'Nunito', sans-serif;
       background: linear-gradient(-45deg, #05070f, #0b1220, #0f172a, #0b1b2e);
@@ -28,387 +20,83 @@
       position: relative;
       overflow-x: hidden;
     }
-
-    @keyframes bgMove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    .rain-key {
-      position: fixed;
-      pointer-events: none;
-      z-index: 0;
-      user-select: none;
-      opacity: 0;
-    }
-    
-    .rain-key img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      filter: drop-shadow(0 0 5px rgba(56,189,248,0.4));
-    }
-
+    @keyframes bgMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    .rain-key { position: fixed; pointer-events: none; z-index: 0; opacity: 0; }
+    .rain-key img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 5px rgba(56,189,248,0.4)); }
     .admin-btn {
-      position: fixed;
-      top: 70px;
-      right: 15px;
-      width: 45px;
-      height: 45px;
-      background: linear-gradient(135deg, #1e1b4b, #2e1a3e);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 100;
-      border: 1px solid rgba(56, 189, 248, 0.5);
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
-      transition: all 0.3s ease;
-      font-size: 22px;
-      backdrop-filter: blur(10px);
+      position: fixed; top: 70px; right: 15px; width: 45px; height: 45px;
+      background: linear-gradient(135deg, #1e1b4b, #2e1a3e); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100;
+      border: 1px solid rgba(56,189,248,0.5); font-size: 22px; backdrop-filter: blur(10px);
     }
-
     .admin-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.95);
-      z-index: 1000;
-      overflow-y: auto;
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.95); z-index: 1000; overflow-y: auto;
     }
-
-    .admin-modal.active {
-      display: block;
-    }
-
+    .admin-modal.active { display: block; }
     .admin-modal-content {
-      max-width: 500px;
-      margin: 50px auto;
-      background: linear-gradient(135deg, #1a1a2e, #16213e);
-      border-radius: 24px;
-      padding: 20px;
-      border: 1px solid rgba(56, 189, 248, 0.3);
+      max-width: 500px; margin: 50px auto; background: linear-gradient(135deg, #1a1a2e, #16213e);
+      border-radius: 24px; padding: 20px; border: 1px solid rgba(56,189,248,0.3);
     }
-
-    .admin-modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid rgba(56, 189, 248, 0.2);
-    }
-
-    .admin-modal-header h2 {
-      font-size: 20px;
-      color: #38bdf8;
-    }
-
-    .close-modal {
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 28px;
-      cursor: pointer;
-    }
-
-    .order-card {
-      background: rgba(15, 23, 42, 0.8);
-      border-radius: 16px;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-left: 3px solid #38bdf8;
-    }
-
-    .order-info p {
-      margin: 8px 0;
-      font-size: 13px;
-      color: #cbd5e1;
-    }
-
-    .order-info strong {
-      color: #fff;
-    }
-
-    .order-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .confirm-btn {
-      background: linear-gradient(90deg, #22c55e, #16a34a);
-      color: white;
-      border: none;
-      padding: 8px 20px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-      flex: 1;
-    }
-
-    .reject-btn {
-      background: linear-gradient(90deg, #ef4444, #dc2626);
-      color: white;
-      border: none;
-      padding: 8px 20px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-      flex: 1;
-    }
-
+    .admin-modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+    .admin-modal-header h2 { color: #38bdf8; }
+    .close-modal { background: none; border: none; color: #fff; font-size: 28px; cursor: pointer; }
+    .order-card { background: rgba(15,23,42,0.8); border-radius: 16px; padding: 15px; margin-bottom: 15px; border-left: 3px solid #38bdf8; }
+    .order-info p { margin: 8px 0; font-size: 13px; color: #cbd5e1; }
+    .order-actions { display: flex; gap: 10px; margin-top: 12px; }
+    .confirm-btn { background: #22c55e; color: white; border: none; padding: 8px; border-radius: 10px; cursor: pointer; flex: 1; }
+    .reject-btn { background: #ef4444; color: white; border: none; padding: 8px; border-radius: 10px; cursor: pointer; flex: 1; }
     .banner {
-      width: 100%;
-      text-align: center;
-      padding: 32px 20px;
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: 3px;
-      color: #e5e7eb;
-      text-shadow: 0 0 12px rgba(255,255,255,0.2), 0 0 25px rgba(56,189,248,0.25);
-      background: linear-gradient(90deg, #020409, #070b14, #020409);
-      border-bottom: 1px solid rgba(56,189,248,0.15);
-      position: relative;
-      z-index: 10;
+      width: 100%; text-align: center; padding: 32px 20px; font-size: 28px; font-weight: 800;
+      color: #e5e7eb; background: linear-gradient(90deg, #020409, #070b14, #020409);
+      border-bottom: 1px solid rgba(56,189,248,0.15); position: relative; z-index: 10;
     }
-
-    .page {
-      display: none;
-      width: 100%;
-      max-width: 420px;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 25px;
-      position: relative;
-      z-index: 10;
-    }
-
-    .active {
-      display: flex;
-    }
-
-    .steam-image {
-      text-align: center;
-      margin: 20px 0 10px 0;
-    }
-
-    .steam-image img {
-      max-width: 90%;
-      height: auto;
-      border-radius: 16px;
-      box-shadow: 0 0 20px rgba(56,189,248,0.3);
-      pointer-events: none;
-    }
-
-    .card {
-      width: 100%;
-      background: rgba(30, 41, 59, 0.6);
-      padding: 22px;
-      border-radius: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      border: 1px solid rgba(56,189,248,0.15);
-      backdrop-filter: blur(10px);
-    }
-
-    input {
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid #334155;
-      background: #0f172a;
-      color: #e5e7eb;
-      font-family: 'Nunito', sans-serif;
-      font-size: 16px;
-    }
-
-    input:focus {
-      border-color: #38bdf8;
-      outline: none;
-    }
-
-    input[type="number"] {
-      -moz-appearance: textfield;
-    }
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-
-    .dropdown {
-      position: relative;
-      width: 100%;
-    }
-
+    .page { display: none; width: 100%; max-width: 420px; flex-direction: column; align-items: center; margin-top: 25px; position: relative; z-index: 10; }
+    .active { display: flex; }
+    .steam-image { text-align: center; margin: 20px 0; }
+    .steam-image img { max-width: 90%; border-radius: 16px; box-shadow: 0 0 20px rgba(56,189,248,0.3); }
+    .card { width: 100%; background: rgba(30,41,59,0.6); padding: 22px; border-radius: 18px; backdrop-filter: blur(10px); border: 1px solid rgba(56,189,248,0.15); }
+    input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: #fff; margin-bottom: 12px; font-size: 16px; }
+    input:focus { border-color: #38bdf8; outline: none; }
+    input[type=number]::-webkit-inner-spin-button { display: none; }
+    .dropdown { position: relative; width: 100%; margin-bottom: 12px; }
     .selected {
-      background: linear-gradient(90deg, #020409, #070b14, #020409);
-      border: 1px solid rgba(56,189,248,0.15);
-      padding: 12px;
-      border-radius: 12px;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: #e5e7eb;
-      font-weight: 600;
+      background: linear-gradient(90deg, #020409, #070b14); border: 1px solid rgba(56,189,248,0.15);
+      padding: 12px; border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between;
+      color: #e5e7eb; font-weight: 600;
     }
-
-    .selected::after {
-      content: "▼";
-      font-size: 12px;
-      color: #38bdf8;
-    }
-
     .options {
-      position: absolute;
-      top: 110%;
-      left: 0;
-      right: 0;
-      background: linear-gradient(90deg, #020409, #070b14, #020409);
-      border: 1px solid rgba(56,189,248,0.2);
-      border-radius: 14px;
-      max-height: 0;
-      overflow: hidden;
-      transition: 0.3s;
-      z-index: 100;
+      position: absolute; top: 110%; left: 0; right: 0; background: linear-gradient(90deg, #020409, #070b14);
+      border: 1px solid rgba(56,189,248,0.2); border-radius: 14px; max-height: 0; overflow: hidden; transition: 0.3s; z-index: 100;
     }
-
-    .dropdown.active .options {
-      max-height: 150px;
-    }
-
-    .option {
-      padding: 12px;
-      cursor: pointer;
-      transition: 0.2s;
-      color: #e5e7eb;
-    }
-
-    .option:hover {
-      background: rgba(56,189,248,0.15);
-      color: #38bdf8;
-    }
-
-    .btn {
-      margin-top: 10px;
-      padding: 13px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 800;
-      font-family: 'Nunito', sans-serif;
-      font-size: 16px;
-      background: linear-gradient(90deg, #38bdf8, #60a5fa);
-      color: #020617;
-      transition: 0.2s;
-    }
-
-    .btn:active {
-      transform: scale(0.98);
-    }
-
-    .qr {
-      width: 200px;
-      height: 200px;
-      background: white;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: black;
-      font-weight: bold;
-      margin: 0 auto;
-    }
-
-    .info {
-      margin-top: 10px;
-      color: #94a3b8;
-      text-align: center;
-      background: rgba(0,0,0,0.3);
-      padding: 15px;
-      border-radius: 12px;
-    }
-
-    .back {
-      margin-top: 20px;
-      cursor: pointer;
-      color: #94a3b8;
-      text-align: center;
-      padding: 10px;
-    }
-
-    .back:hover {
-      color: #38bdf8;
-    }
-
-    .error {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(239,68,68,0.95);
-      padding: 12px 18px;
-      border-radius: 10px;
-      z-index: 1000;
-      font-weight: 600;
-      animation: slideUp 0.3s ease;
-    }
-
-    @keyframes slideUp {
-      from {
-        transform: translateX(-50%) translateY(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(-50%) translateY(0);
-        opacity: 1;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .banner { font-size: 22px; padding: 20px; }
-      .steam-image img { max-width: 85%; }
-      .admin-btn { top: 60px; right: 10px; width: 40px; height: 40px; font-size: 18px; }
-    }
+    .dropdown.active .options { max-height: 150px; }
+    .option { padding: 12px; cursor: pointer; color: #e5e7eb; }
+    .option:hover { background: rgba(56,189,248,0.15); color: #38bdf8; }
+    .btn { width: 100%; padding: 13px; background: linear-gradient(90deg, #38bdf8, #60a5fa); border: none; border-radius: 12px; font-weight: 800; cursor: pointer; }
+    .qr { width: 200px; height: 200px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto; color: black; }
+    .info { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; text-align: center; margin-top: 15px; color: #94a3b8; }
+    .back { text-align: center; margin-top: 20px; cursor: pointer; color: #94a3b8; }
+    .error { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #ef4444; padding: 12px 20px; border-radius: 50px; z-index: 1000; }
+    @media (max-width: 480px) { .banner { font-size: 22px; } .admin-btn { top: 60px; width: 40px; height: 40px; font-size: 18px; } }
   </style>
 </head>
-
 <body>
 
-<div id="adminBtn" class="admin-btn" style="display: none;" onclick="openAdminPanel()">
-  👑
-</div>
-
+<div id="adminBtn" class="admin-btn" style="display: none;" onclick="openAdminPanel()">👑</div>
 <div id="adminModal" class="admin-modal">
   <div class="admin-modal-content">
-    <div class="admin-modal-header">
-      <h2>📋 Управление заказами</h2>
-      <button class="close-modal" onclick="closeAdminPanel()">×</button>
-    </div>
-    <div id="ordersList">
-      <div style="text-align: center; padding: 40px;">Загрузка...</div>
-    </div>
+    <div class="admin-modal-header"><h2>📋 Управление заказами</h2><button class="close-modal" onclick="closeAdminPanel()">×</button></div>
+    <div id="ordersList">Загрузка...</div>
   </div>
 </div>
 
 <div class="banner">EGH SHOP</div>
 
 <div class="page active" id="home">
-  <div class="steam-image">
-    <img src="image.png" alt="Steam Пополнение" draggable="false">
-  </div>
-
+  <div class="steam-image"><img src="image.png" draggable="false"></div>
   <div class="card">
     <input id="login" placeholder="Логин Steam">
-    <input id="amount" type="number" placeholder="Сумма" step="1" min="1">
-
+    <input id="amount" type="number" placeholder="Сумма">
     <div class="dropdown" id="dropdown">
       <div class="selected" onclick="toggleDropdown()">RUB ₽</div>
       <div class="options">
@@ -416,13 +104,12 @@
         <div class="option" onclick="selectCurrency('KZT','₸')">KZT ₸</div>
       </div>
     </div>
-
     <button class="btn" onclick="pay()">Оплатить</button>
   </div>
 </div>
 
 <div class="page" id="pay">
-  <h1>Оплата</h1>
+  <h1 style="color:#fff">Оплата</h1>
   <div class="qr">QR CODE</div>
   <div class="info" id="info"></div>
   <div class="back" onclick="goBack()">← Назад</div>
@@ -432,279 +119,110 @@
   const tg = window.Telegram.WebApp;
   tg.expand();
   
-  let currency = "RUB";
-  let symbol = "₽";
-  let currentOrderId = null;
-  
-  const currentUser = tg.initDataUnsafe?.user || {};
+  let currency = "RUB", symbol = "₽", currentOrderId = null;
+  const user = tg.initDataUnsafe?.user || { id: 0, username: "Guest" };
   const ADMIN_ID = 1641610032;
-  const isAdmin = currentUser.id === ADMIN_ID;
-
-  // Загружаем заказы из localStorage
-  let allOrders = JSON.parse(localStorage.getItem('egh_orders_all') || '{}');
-
-  // Отправка через tg.sendData (работает всегда для любых пользователей!)
-  function sendToBot(data) {
-    try {
-      tg.sendData(JSON.stringify(data));
-      console.log("Отправлено через tg.sendData:", data);
-      return true;
-    } catch(e) {
-      console.error("Ошибка tg.sendData:", e);
-      return false;
-    }
-  }
-
-  if (isAdmin) {
-    document.getElementById('adminBtn').style.display = 'flex';
-    loadAdminOrders();
-  }
-
-  function goBack() {
-    document.getElementById("login").value = "";
-    document.getElementById("amount").value = "";
-    openPage('home');
-  }
-
+  const isAdmin = user.id === ADMIN_ID;
+  
+  let allOrders = JSON.parse(localStorage.getItem('egh_orders') || '{}');
+  
+  if (isAdmin) document.getElementById('adminBtn').style.display = 'flex';
+  
+  function goBack() { openPage('home'); }
   function openPage(id) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById(id).classList.add('active');
   }
-
+  
+  function toggleDropdown() { document.getElementById("dropdown").classList.toggle("active"); }
+  function selectCurrency(cur, sym) { currency = cur; symbol = sym; document.querySelector(".selected").innerHTML = `${cur} ${sym}`; document.getElementById("dropdown").classList.remove("active"); }
+  
+  function showError(text) {
+    const div = document.createElement("div"); div.className = "error"; div.innerHTML = text;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 2500);
+  }
+  
   function pay() {
     const login = document.getElementById("login").value.trim();
-    const amountRaw = document.getElementById("amount").value.trim();
-
-    if (!login) {
-      showError("Введите логин Steam");
-      return;
-    }
-    if (!amountRaw || amountRaw <= 0) {
-      showError("Введите сумму");
-      return;
-    }
-
-    const amount = parseFloat(amountRaw);
+    const amount = document.getElementById("amount").value.trim();
+    if (!login || !amount || amount <= 0) { showError("Проверь данные"); return; }
+    
     currentOrderId = Date.now();
-
     const orderData = {
-      action: 'new_order',
-      order_id: currentOrderId,
-      login: login,
-      amount: amount,
-      currency: currency,
-      symbol: symbol,
-      user_id: currentUser.id || 0,
-      username: currentUser.username || currentUser.first_name || 'Пользователь',
-      timestamp: new Date().toLocaleString(),
-      status: 'pending'
+      action: 'new_order', order_id: currentOrderId, login, amount: parseFloat(amount),
+      currency, symbol, user_id: user.id, username: user.username || user.first_name || 'Пользователь',
+      timestamp: new Date().toLocaleString(), status: 'pending'
     };
-
-    // Сохраняем в локальное хранилище
+    
     allOrders[currentOrderId] = orderData;
-    localStorage.setItem('egh_orders_all', JSON.stringify(allOrders));
-
-    // Отправляем через tg.sendData (это работает для любых пользователей!)
-    const sent = sendToBot(orderData);
+    localStorage.setItem('egh_orders', JSON.stringify(allOrders));
+    tg.sendData(JSON.stringify(orderData));
     
-    if (!sent) {
-      // Если не отправилось, показываем предупреждение
-      showError("⚠️ Заказ сохранён локально, но не отправлен. Попробуйте ещё раз.");
-    }
-
-    // Показываем статус
-    document.getElementById("info").innerHTML = 
-      `🧑 Покупатель: @${orderData.username}<br>` +
-      `🎮 Логин: ${login}<br>` +
-      `💵 Сумма: ${amount} ${symbol}<br><br>` +
-      `🟡 Статус: <span style="color: #f59e0b;">Ожидает подтверждения</span><br><br>` +
-      `📢 Администратор уведомлён`;
-
+    document.getElementById("info").innerHTML = `🧑 @${orderData.username}<br>🎮 ${login}<br>💵 ${amount} ${symbol}<br><br>🟡 Ожидает подтверждения`;
     openPage('pay');
-    
-    // Показываем попап
-    tg.showPopup({
-      title: "✅ Заказ создан",
-      message: `Заказ #${currentOrderId} на сумму ${amount} ${symbol} отправлен!`,
-      buttons: [{type: "ok"}]
-    });
+    tg.showPopup({ title: "✅ Заказ создан", message: `Заказ #${currentOrderId} на ${amount} ${symbol} отправлен!`, buttons: [{type:"ok"}] });
   }
-
-  function toggleDropdown() {
-    document.getElementById("dropdown").classList.toggle("active");
-  }
-
-  function selectCurrency(cur, sym) {
-    currency = cur;
-    symbol = sym;
-    document.querySelector(".selected").innerHTML = `${cur} ${sym}`;
-    document.getElementById("dropdown").classList.remove("active");
-  }
-
-  function showError(text) {
-    const div = document.createElement("div");
-    div.className = "error";
-    div.innerHTML = text;
-    document.body.appendChild(div);
-    setTimeout(() => {
-      div.style.opacity = '0';
-      setTimeout(() => div.remove(), 300);
-    }, 2500);
-  }
-
-  // Админ-панель
-  function openAdminPanel() {
-    if (!isAdmin) return;
-    document.getElementById('adminModal').classList.add('active');
-    loadAdminOrders();
-  }
-
-  function closeAdminPanel() {
-    document.getElementById('adminModal').classList.remove('active');
-  }
-
+  
+  // АДМИН ПАНЕЛЬ
+  function openAdminPanel() { if(!isAdmin) return; document.getElementById('adminModal').classList.add('active'); loadAdminOrders(); }
+  function closeAdminPanel() { document.getElementById('adminModal').classList.remove('active'); }
+  
   function loadAdminOrders() {
     const ordersList = document.getElementById('ordersList');
-    const pendingOrders = Object.values(allOrders).filter(order => order.status === 'pending');
-    
-    if (pendingOrders.length === 0) {
-      ordersList.innerHTML = '<div style="text-align: center; padding: 40px;">📭 Нет активных заказов</div>';
-      return;
-    }
-
-    ordersList.innerHTML = pendingOrders.map(order => `
+    const pending = Object.values(allOrders).filter(o => o.status === 'pending');
+    if(pending.length === 0) { ordersList.innerHTML = '<div style="text-align:center;padding:40px">📭 Нет заказов</div>'; return; }
+    ordersList.innerHTML = pending.map(order => `
       <div class="order-card">
-        <div class="order-info">
-          <p><strong>🆔 Заказ:</strong> #${order.order_id}</p>
-          <p><strong>👤 Покупатель:</strong> @${order.username}</p>
-          <p><strong>🎮 Логин Steam:</strong> ${order.login}</p>
-          <p><strong>💰 Сумма:</strong> ${order.amount} ${order.symbol}</p>
-          <p><strong>💱 Валюта:</strong> ${order.currency}</p>
-          <p><strong>📅 Время:</strong> ${order.timestamp}</p>
-        </div>
-        <div class="order-actions">
-          <button class="confirm-btn" onclick="approveOrder('${order.order_id}')">✅ Подтвердить</button>
-          <button class="reject-btn" onclick="rejectOrder('${order.order_id}')">❌ Отклонить</button>
-        </div>
+        <div class="order-info"><p><strong>#${order.order_id}</strong> | @${order.username}</p><p>🎮 ${order.login}</p><p>💰 ${order.amount} ${order.symbol}</p><p>📅 ${order.timestamp}</p></div>
+        <div class="order-actions"><button class="confirm-btn" onclick="approveOrder('${order.order_id}')">✅ Подтвердить</button><button class="reject-btn" onclick="rejectOrder('${order.order_id}')">❌ Отклонить</button></div>
       </div>
     `).join('');
   }
-
-  function approveOrder(orderId) {
-    const order = allOrders[orderId];
-    if (!order) {
-      showError("Заказ не найден");
-      return;
-    }
-    
+  
+  function approveOrder(id) {
+    const order = allOrders[id];
+    if(!order) return;
     order.status = 'completed';
-    localStorage.setItem('egh_orders_all', JSON.stringify(allOrders));
-    
-    // Отправляем уведомление через tg.sendData
-    sendToBot({
-      action: 'approve_order',
-      order_id: orderId,
-      user_id: order.user_id,
-      amount: order.amount,
-      symbol: order.symbol,
-      login: order.login
-    });
-    
+    localStorage.setItem('egh_orders', JSON.stringify(allOrders));
+    tg.sendData(JSON.stringify({ action: 'approve_order', order_id: id, user_id: order.user_id, amount: order.amount, symbol: order.symbol, login: order.login }));
     loadAdminOrders();
-    showError(`✅ Заказ #${orderId} подтверждён!`);
-    
-    if (currentOrderId == orderId) {
-      document.getElementById("info").innerHTML = 
-        `🧑 Покупатель: @${order.username}<br>` +
-        `🎮 Логин: ${order.login}<br>` +
-        `💰 Сумма: ${order.amount} ${order.symbol}<br><br>` +
-        `✅ <span style="color: #22c55e; font-weight: bold;">ЗАКАЗ ПОДТВЕРЖДЁН!</span><br><br>` +
-        `🎉 Спасибо за покупку!`;
-    }
+    showError(`✅ Заказ #${id} подтверждён`);
+    if(currentOrderId == id) document.getElementById("info").innerHTML = `✅ ЗАКАЗ ПОДТВЕРЖДЁН!<br>💰 ${order.amount} ${order.symbol}`;
   }
-
-  function rejectOrder(orderId) {
-    const order = allOrders[orderId];
-    if (!order) {
-      showError("Заказ не найден");
-      return;
-    }
-    
+  
+  function rejectOrder(id) {
+    const order = allOrders[id];
+    if(!order) return;
     order.status = 'rejected';
-    localStorage.setItem('egh_orders_all', JSON.stringify(allOrders));
-    
-    // Отправляем уведомление через tg.sendData
-    sendToBot({
-      action: 'reject_order',
-      order_id: orderId,
-      user_id: order.user_id,
-      amount: order.amount,
-      symbol: order.symbol
-    });
-    
+    localStorage.setItem('egh_orders', JSON.stringify(allOrders));
+    tg.sendData(JSON.stringify({ action: 'reject_order', order_id: id, user_id: order.user_id, amount: order.amount, symbol: order.symbol }));
     loadAdminOrders();
-    showError(`❌ Заказ #${orderId} отклонён!`);
-    
-    if (currentOrderId == orderId) {
-      document.getElementById("info").innerHTML = 
-        `🧑 Покупатель: @${order.username}<br>` +
-        `🎮 Логин: ${order.login}<br>` +
-        `💰 Сумма: ${order.amount} ${order.symbol}<br><br>` +
-        `❌ <span style="color: #ef4444; font-weight: bold;">ЗАКАЗ ОТКЛОНЁН</span><br><br>` +
-        `💸 Средства возвращены на баланс.`;
+    showError(`❌ Заказ #${id} отклонён`);
+    if(currentOrderId == id) document.getElementById("info").innerHTML = `❌ ЗАКАЗ ОТКЛОНЁН<br>💸 Средства возвращены`;
+  }
+  
+  document.addEventListener("click", function(e) { const d = document.getElementById("dropdown"); if(d && !d.contains(e.target)) d.classList.remove("active"); });
+  document.addEventListener("keypress", e => { if(e.key === "Enter" && document.getElementById("home").classList.contains("active")) pay(); });
+  document.addEventListener('dragstart', e => e.preventDefault());
+  
+  // ДОЖДЬ ИЗ КЛЮЧЕЙ
+  function createRain() {
+    for(let i=0;i<35;i++) {
+      const k = document.createElement('div'); k.className = 'rain-key';
+      const img = document.createElement('img'); img.src = 'key.png'; img.draggable = false;
+      img.onerror = () => { k.innerHTML = '🔑'; k.style.fontSize = '30px'; };
+      k.appendChild(img);
+      const s = Math.random() * 40 + 25; k.style.width = s+'px'; k.style.height = s+'px';
+      k.style.left = Math.random()*100+'%'; k.style.top = '-10%';
+      const d = Math.random()*15, dur = Math.random()*5+4, tilt = (Math.random()-0.5)*100;
+      const anim = `@keyframes r${i}{0%{transform:translate(0,-10vh) rotate(0deg);opacity:0}10%{opacity:0.7}90%{opacity:0.7}100%{transform:translate(${tilt}px,110vh) rotate(360deg);opacity:0}}`;
+      const st = document.createElement('style'); st.textContent = anim; document.head.appendChild(st);
+      k.style.animation = `r${i} ${dur}s linear ${d}s infinite`;
+      document.body.appendChild(k);
     }
   }
-
-  document.addEventListener("click", function(e) {
-    const dropdown = document.getElementById("dropdown");
-    if (dropdown && !dropdown.contains(e.target)) {
-      dropdown.classList.remove("active");
-    }
-  });
-
-  document.addEventListener("keypress", function(e) {
-    if (e.key === "Enter" && document.getElementById("home").classList.contains("active")) {
-      pay();
-    }
-  });
-
-  document.addEventListener('dragstart', (e) => e.preventDefault());
-
-  // Дождь из ключей
-  function createRainOfKeys() {
-    const keyCount = 30;
-    for(let i = 0; i < keyCount; i++) {
-      const keyDiv = document.createElement('div');
-      keyDiv.className = 'rain-key';
-      const img = document.createElement('img');
-      img.src = 'key.png';
-      img.draggable = false;
-      img.onerror = () => { keyDiv.innerHTML = '🔑'; keyDiv.style.fontSize = '30px'; };
-      keyDiv.appendChild(img);
-      const size = Math.random() * 40 + 25;
-      keyDiv.style.width = size + 'px';
-      keyDiv.style.height = size + 'px';
-      keyDiv.style.left = Math.random() * 100 + '%';
-      keyDiv.style.top = '-10%';
-      const delay = Math.random() * 15;
-      const duration = Math.random() * 5 + 4;
-      const tilt = (Math.random() - 0.5) * 100;
-      const anim = `@keyframes rain_${i}{0%{transform:translate(0,-10vh) rotate(0deg);opacity:0}10%{opacity:0.7}90%{opacity:0.7}100%{transform:translate(${tilt}px,110vh) rotate(360deg);opacity:0}}`;
-      const style = document.createElement('style');
-      style.textContent = anim;
-      document.head.appendChild(style);
-      keyDiv.style.animation = `rain_${i} ${duration}s linear ${delay}s infinite`;
-      document.body.appendChild(keyDiv);
-    }
-  }
-
-  window.addEventListener('load', () => {
-    setTimeout(createRainOfKeys, 100);
-    console.log('EGH SHOP загружен');
-    console.log('Пользователь:', currentUser);
-    console.log('Админ:', isAdmin);
-  });
+  window.addEventListener('load', () => { setTimeout(createRain, 100); });
 </script>
-
 </body>
 </html>
