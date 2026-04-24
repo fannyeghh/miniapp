@@ -19,6 +19,10 @@
       -moz-osx-font-smoothing: grayscale;
       margin: 0;
       padding: 0;
+      user-select: none; /* Запрещаем выделение текста и картинок */
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
     }
 
     body {
@@ -59,24 +63,10 @@
       height: 100%;
       object-fit: contain;
       filter: drop-shadow(0 0 8px rgba(56,189,248,0.3));
-    }
-    
-    /* Анимация падения по диагонали как дождь */
-    @keyframes rainDiagonal {
-      0% {
-        transform: translate(0, -20vh) rotate(0deg);
-        opacity: 0;
-      }
-      5% {
-        opacity: 0.6;
-      }
-      95% {
-        opacity: 0.6;
-      }
-      100% {
-        transform: translate(30vw, 120vh) rotate(180deg);
-        opacity: 0;
-      }
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-drag: none; /* Запрещаем перетаскивание */
+      -webkit-user-select: none;
     }
     
     /* 🔥 БАННЕР */
@@ -110,10 +100,12 @@
       display: flex;
     }
 
-    /* Стиль для картинки Steam */
+    /* Стиль для картинки Steam - защита от перетаскивания */
     .steam-image {
       text-align: center;
       margin: 20px 0 10px 0;
+      user-select: none;
+      -webkit-user-drag: none;
     }
 
     .steam-image img {
@@ -124,6 +116,9 @@
       transition: transform 0.3s ease;
       position: relative;
       z-index: 2;
+      pointer-events: none; /* Запрещаем взаимодействие с картинкой */
+      user-select: none;
+      -webkit-user-drag: none;
     }
 
     .steam-image img:hover {
@@ -159,6 +154,18 @@
       border-color: #38bdf8;
       box-shadow: 0 0 12px rgba(56,189,248,0.25);
       outline: none;
+    }
+
+    /* Убираем стрелочки в поле ввода суммы */
+    input[type="number"] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+    
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
     }
 
     .btn {
@@ -316,9 +323,9 @@
 
 <div class="page active" id="home">
   
-  <!-- Ваша картинка Steam -->
+  <!-- Ваша картинка Steam - теперь её нельзя перетащить -->
   <div class="steam-image">
-    <img src="image.png" alt="Steam Пополнение">
+    <img src="image.png" alt="Steam Пополнение" draggable="false">
   </div>
 
   <div class="card">
@@ -365,6 +372,12 @@
 
     if (!login || !amount || amount <= 0) {
       showError("Проверь данные");
+      return;
+    }
+
+    // Дополнительная проверка: сумма не должна быть отрицательной
+    if (parseFloat(amount) <= 0) {
+      showError("Сумма должна быть больше 0");
       return;
     }
 
@@ -420,21 +433,26 @@
     }
   });
 
+  // Запрещаем перетаскивание на всей странице
+  document.addEventListener('dragstart', function(e) {
+    e.preventDefault();
+    return false;
+  });
+
   // ========== ДОЖДЬ ИЗ КЛЮЧЕЙ ==========
   
   function createRainOfKeys() {
-    const keyCount = 40; // 40 ключей для эффекта дождя
+    const keyCount = 40;
     
     for(let i = 0; i < keyCount; i++) {
       const keyDiv = document.createElement('div');
       keyDiv.className = 'rain-key';
       
-      // Создаём img элемент
       const img = document.createElement('img');
       img.src = 'key.png';
       img.alt = 'Steam Key';
+      img.draggable = false; // Запрещаем перетаскивание
       
-      // Fallback если картинка не загрузилась
       img.onerror = function() {
         keyDiv.innerHTML = '🔑';
         keyDiv.style.fontSize = size + 'px';
@@ -446,28 +464,18 @@
       
       keyDiv.appendChild(img);
       
-      // Случайный размер (разные ключи)
-      const size = Math.random() * 45 + 25; // 25-70px
+      const size = Math.random() * 45 + 25;
       keyDiv.style.width = size + 'px';
       keyDiv.style.height = size + 'px';
       
-      // Случайная позиция по X (по всей ширине экрана)
-      const startX = Math.random() * 100; // 0-100%
+      const startX = Math.random() * 100;
       keyDiv.style.left = startX + '%';
-      
-      // Все начинают сверху (за экраном)
       keyDiv.style.top = '-20vh';
       
-      // Случайная задержка (чтобы не падали все одновременно)
-      const delay = Math.random() * 20; // 0-20 секунд
+      const delay = Math.random() * 20;
+      const duration = Math.random() * 6 + 4;
+      const tilt = Math.random() * 60 + 20;
       
-      // Скорость падения (чем меньше число, тем быстрее)
-      const duration = Math.random() * 6 + 4; // 4-10 секунд
-      
-      // Наклон падения (разные углы для разных ключей)
-      const tilt = Math.random() * 60 + 20; // 20-80px смещения по X
-      
-      // Индивидуальная анимация для каждого ключа
       const animationName = `rain_${i}`;
       const styleSheet = document.createElement('style');
       styleSheet.textContent = `
@@ -496,12 +504,11 @@
     }
   }
   
-  // Запускаем дождь из ключей после загрузки
   window.addEventListener('load', function() {
     setTimeout(createRainOfKeys, 100);
   });
   
-  console.log("🗝️ Дождь из ключей активирован! 40 ключей падают по всей ширине экрана");
+  console.log("🗝️ Дождь из ключей активирован!");
 </script>
 
 </body>
