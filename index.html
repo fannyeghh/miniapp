@@ -3,105 +3,177 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
   <title>EGH SHOP</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+  <!-- 🔥 ШРИФТ -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Telegram WebApp -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
     body {
       margin: 0;
       font-family: 'Nunito', sans-serif;
-      color: white;
-      overflow-x: hidden;
-      background: #020617;
+      color: #e5e7eb;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      background: linear-gradient(-45deg, #05070f, #0b1220, #0f172a, #0b1b2e);
+      background-size: 400% 400%;
+      animation: bgMove 12s ease infinite;
     }
 
-    canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: -1;
+    @keyframes bgMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
+    /* 🔥 БАННЕР */
     .banner {
       width: 100%;
       text-align: center;
-      padding: 30px;
-      font-size: 26px;
+      padding: 32px 20px;
+
+      font-size: 28px;
       font-weight: 800;
+      letter-spacing: 3px;
+
+      color: #e5e7eb;
+
+      text-shadow:
+        0 0 12px rgba(255,255,255,0.2),
+        0 0 25px rgba(56,189,248,0.25);
+
+      background: linear-gradient(90deg, #020409, #070b14, #020409);
+      border-bottom: 1px solid rgba(56,189,248,0.15);
     }
 
     .page {
       display: none;
+      width: 100%;
       max-width: 420px;
-      margin: auto;
-      padding: 20px;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 25px;
     }
 
-    .active { display: block; }
+    .active {
+      display: flex;
+    }
+
+    h1 {
+      font-weight: 800;
+      letter-spacing: 1px;
+
+      text-shadow:
+        0 0 8px rgba(255,255,255,0.15);
+    }
 
     .card {
-      background: rgba(15,23,42,0.7);
-      padding: 20px;
-      border-radius: 16px;
-      backdrop-filter: blur(10px);
+      width: 100%;
+      background: rgba(30, 41, 59, 0.6);
+      padding: 22px;
+      border-radius: 18px;
+
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
+
+      border: 1px solid rgba(56,189,248,0.15);
+      box-shadow: 0 0 20px rgba(56,189,248,0.05);
+      backdrop-filter: blur(10px);
     }
 
     input {
       padding: 12px;
-      border-radius: 10px;
+      border-radius: 12px;
       border: 1px solid #334155;
-      background: #020617;
-      color: white;
+      background: #0f172a;
+      color: #e5e7eb;
+
+      font-family: 'Nunito', sans-serif;
+    }
+
+    input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 12px rgba(56,189,248,0.25);
+      outline: none;
     }
 
     .btn {
-      padding: 12px;
-      border-radius: 10px;
+      margin-top: 10px;
+      padding: 13px;
       border: none;
-      font-weight: 800;
-      background: linear-gradient(90deg,#38bdf8,#60a5fa);
-      color: black;
+      border-radius: 12px;
       cursor: pointer;
+
+      font-weight: 800;
+      font-family: 'Nunito', sans-serif;
+
+      background: linear-gradient(90deg, #38bdf8, #60a5fa);
+      color: #020617;
+
+      transition: 0.2s;
     }
 
-    .dropdown { position: relative; }
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    /* 💱 ДРОПДАУН */
+    .dropdown {
+      position: relative;
+      width: 100%;
+    }
 
     .selected {
-      padding: 12px;
-      border-radius: 10px;
+      background: #0f172a;
       border: 1px solid #334155;
-      background: #020617;
+      padding: 12px;
+      border-radius: 12px;
       cursor: pointer;
     }
 
     .options {
       position: absolute;
+      top: 110%;
       width: 100%;
-      background: #020617;
-      border-radius: 10px;
-      overflow: hidden;
+
+      background: rgba(15, 23, 42, 0.98);
+      border: 1px solid rgba(56,189,248,0.2);
+      border-radius: 14px;
+
       max-height: 0;
-      transition: 0.3s;
+      overflow: hidden;
+      opacity: 0;
+
+      transition: 0.25s;
     }
 
     .dropdown.active .options {
-      max-height: 150px;
+      max-height: 200px;
+      opacity: 1;
     }
 
     .option {
-      padding: 10px;
+      padding: 12px;
       cursor: pointer;
     }
 
     .option:hover {
-      background: rgba(56,189,248,0.2);
+      background: rgba(56,189,248,0.15);
+      color: #38bdf8;
     }
 
     .qr {
@@ -109,10 +181,13 @@
       height: 200px;
       background: white;
       border-radius: 12px;
+
       display: flex;
       align-items: center;
       justify-content: center;
+
       color: black;
+      font-weight: bold;
     }
 
     .info {
@@ -127,20 +202,30 @@
       cursor: pointer;
       color: #94a3b8;
     }
+
+    .error {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+
+      background: rgba(239,68,68,0.9);
+      padding: 12px 18px;
+      border-radius: 10px;
+    }
   </style>
 </head>
 
 <body>
 
-<canvas id="bg"></canvas>
-
 <div class="banner">EGH SHOP</div>
 
-<!-- 🏠 -->
 <div class="page active" id="home">
+
   <h1>Пополнение Steam</h1>
 
   <div class="card">
+
     <input id="login" placeholder="Логин Steam">
     <input id="amount" type="number" placeholder="Сумма">
 
@@ -152,124 +237,78 @@
       </div>
     </div>
 
-    <button class="btn" onclick="goToPayment()">Оплата</button>
+    <button class="btn" onclick="pay()">Оплатить</button>
+
   </div>
 </div>
 
-<!-- 💳 -->
 <div class="page" id="pay">
   <h1>Оплата</h1>
 
-  <div class="qr">QR</div>
+  <div class="qr">QR CODE</div>
+
   <div class="info" id="info"></div>
 
   <div class="back" onclick="openPage('home')">← Назад</div>
 </div>
 
 <script>
-const tg = window.Telegram.WebApp;
-tg.expand();
+  const tg = window.Telegram.WebApp;
+  tg.expand();
 
-/* --- страницы --- */
-function openPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
+  let currency = "RUB";
+  let symbol = "₽";
 
-/* --- валюта --- */
-let currency = "RUB";
-let symbol = "₽";
-
-function toggleDropdown() {
-  document.getElementById("dropdown").classList.toggle("active");
-}
-
-function selectCurrency(cur, sym) {
-  currency = cur;
-  symbol = sym;
-  document.querySelector(".selected").innerText = cur + " " + sym;
-  document.getElementById("dropdown").classList.remove("active");
-}
-
-/* --- оплата --- */
-function goToPayment() {
-  const login = document.getElementById("login").value.trim();
-  const amount = document.getElementById("amount").value.trim();
-
-  if (!login || !amount || amount <= 0) {
-    alert("Заполни все поля");
-    return;
+  function openPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
   }
 
-  document.getElementById("info").innerText =
-    `Логин: ${login}\nСумма: ${amount} ${symbol}`;
+  function pay() {
+    const login = document.getElementById("login").value.trim();
+    const amount = document.getElementById("amount").value.trim();
 
-  tg.sendData(JSON.stringify({login, amount, currency}));
+    if (!login || !amount || amount <= 0) {
+      showError("Проверь данные");
+      return;
+    }
 
-  openPage('pay');
-}
+    const data = { login, amount, currency };
 
-/* --- фон (fluid) --- */
-const canvas = document.getElementById("bg");
-const ctx = canvas.getContext("2d");
+    tg.sendData(JSON.stringify(data));
 
-let w,h;
-function resize(){
-  w=canvas.width=window.innerWidth;
-  h=canvas.height=window.innerHeight;
-}
-resize();
-window.addEventListener("resize",resize);
+    document.getElementById("info").innerText =
+      `Логин: ${login}\nСумма: ${amount} ${symbol}`;
 
-let particles=[];
-
-for(let i=0;i<40;i++){
-  particles.push({
-    x:Math.random()*w,
-    y:Math.random()*h,
-    vx:(Math.random()-0.5)*2,
-    vy:(Math.random()-0.5)*2,
-    size:Math.random()*200+100
-  });
-}
-
-function draw(){
-  ctx.clearRect(0,0,w,h);
-
-  for(let p of particles){
-    p.x+=p.vx;
-    p.y+=p.vy;
-
-    if(p.x<0||p.x>w) p.vx*=-1;
-    if(p.y<0||p.y>h) p.vy*=-1;
-
-    let g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.size);
-    g.addColorStop(0,"rgba(56,189,248,0.25)");
-    g.addColorStop(0.5,"rgba(14,165,233,0.15)");
-    g.addColorStop(1,"transparent");
-
-    ctx.fillStyle=g;
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
-    ctx.fill();
+    openPage('pay');
   }
 
-  requestAnimationFrame(draw);
-}
-draw();
+  function toggleDropdown() {
+    document.getElementById("dropdown").classList.toggle("active");
+  }
 
-/* реакция */
-window.addEventListener("mousemove",e=>{
-  particles.push({
-    x:e.clientX,
-    y:e.clientY,
-    vx:(Math.random()-0.5)*4,
-    vy:(Math.random()-0.5)*4,
-    size:150
+  function selectCurrency(cur, sym) {
+    currency = cur;
+    symbol = sym;
+
+    document.querySelector(".selected").innerText = cur + " " + sym;
+    document.getElementById("dropdown").classList.remove("active");
+  }
+
+  function showError(text) {
+    const div = document.createElement("div");
+    div.className = "error";
+    div.innerText = text;
+
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 2000);
+  }
+
+  document.addEventListener("click", function(e) {
+    if (!document.getElementById("dropdown").contains(e.target)) {
+      document.getElementById("dropdown").classList.remove("active");
+    }
   });
-
-  if(particles.length>60) particles.shift();
-});
 </script>
 
 </body>
