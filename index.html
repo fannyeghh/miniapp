@@ -70,10 +70,6 @@
       backdrop-filter: blur(10px);
     }
 
-    .admin-btn:hover {
-      transform: scale(1.1);
-    }
-
     .admin-modal {
       display: none;
       position: fixed;
@@ -166,18 +162,6 @@
       font-weight: bold;
       flex: 1;
     }
-
-    .order-status {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: bold;
-    }
-
-    .status-pending { background: #f59e0b; color: #000; }
-    .status-completed { background: #22c55e; color: #fff; }
-    .status-rejected { background: #ef4444; color: #fff; }
 
     .banner {
       width: 100%;
@@ -446,14 +430,19 @@
 <script>
   const tg = window.Telegram.WebApp;
   tg.expand();
-  tg.enableClosingConfirmation();
 
   let currency = "RUB";
   let symbol = "₽";
   let currentOrderId = null;
-  let isAdmin = false;
   
   const currentUser = tg.initDataUnsafe?.user || {};
+  const ADMIN_ID = 1641610032;
+  const isAdmin = currentUser.id === ADMIN_ID;
+
+  // Показываем кнопку админа
+  if (isAdmin) {
+    document.getElementById('adminBtn').style.display = 'flex';
+  }
 
   function goBack() {
     openPage('home');
@@ -551,57 +540,52 @@
   }
 
   function approveOrder(orderId) {
-    tg.sendData(JSON.stringify({ action: 'approve_order', order_id: orderId }));
+    tg.sendData(JSON.stringify({ action: 'approve_order', order_id: orderId, admin_id: currentUser.id }));
   }
 
   function rejectOrder(orderId) {
-    tg.sendData(JSON.stringify({ action: 'reject_order', order_id: orderId }));
+    tg.sendData(JSON.stringify({ action: 'reject_order', order_id: orderId, admin_id: currentUser.id }));
   }
 
-  // Функции, вызываемые из бота
-  window.setAdminStatus = function(admin) {
-    isAdmin = admin;
-    if (isAdmin) {
-      document.getElementById('adminBtn').style.display = 'flex';
-    }
-  };
-
-  window.updateOrdersList = function(orders) {
-    const ordersList = document.getElementById('ordersList');
-    const pendingOrders = orders.filter(o => o.status === 'pending');
+  // Получение ответов от бота
+  window.handleBotResponse = function(response) {
+    console.log("Ответ от бота:", response);
     
-    if (pendingOrders.length === 0) {
-      ordersList.innerHTML = '<div style="text-align: center; padding: 40px;">Нет активных заказов</div>';
-      return;
-    }
+    if (response.action === 'orders_list') {
+      const ordersList = document.getElementById('ordersList');
+      const orders = response.orders;
+      const pendingOrders = orders.filter(o => o.status === 'pending');
+      
+      if (pendingOrders.length === 0) {
+        ordersList.innerHTML = '<div style="text-align: center; padding: 40px;">Нет активных заказов</div>';
+        return;
+      }
 
-    ordersList.innerHTML = pendingOrders.map(order => `
-      <div class="order-card" id="order_${order.order_id}">
-        <div class="order-info">
-          <p><strong>Заказ:</strong> #${order.order_id}</p>
-          <p><strong>Покупатель:</strong> @${order.username}</p>
-          <p><strong>Логин Steam:</strong> ${order.login}</p>
-          <p><strong>Сумма:</strong> ${order.amount} ${order.symbol}</p>
-          <p><strong>Валюта:</strong> ${order.currency}</p>
-          <p><strong>Время:</strong> ${order.timestamp}</p>
+      ordersList.innerHTML = pendingOrders.map(order => `
+        <div class="order-card">
+          <div class="order-info">
+            <p><strong>Заказ:</strong> #${order.order_id}</p>
+            <p><strong>Покупатель:</strong> @${order.username}</p>
+            <p><strong>Логин Steam:</strong> ${order.login}</p>
+            <p><strong>Сумма:</strong> ${order.amount} ${order.symbol}</p>
+            <p><strong>Валюта:</strong> ${order.currency}</p>
+            <p><strong>Время:</strong> ${order.timestamp}</p>
+          </div>
+          <div class="order-actions">
+            <button class="confirm-btn" onclick="approveOrder('${order.order_id}')">✅ Подтвердить</button>
+            <button class="reject-btn" onclick="rejectOrder('${order.order_id}')">❌ Отклонить</button>
+          </div>
         </div>
-        <div class="order-actions">
-          <button class="confirm-btn" onclick="approveOrder('${order.order_id}')">✅ Подтвердить</button>
-          <button class="reject-btn" onclick="rejectOrder('${order.order_id}')">❌ Отклонить</button>
-        </div>
-      </div>
-    `).join('');
-  };
-
-  window.updateOrderStatus = function(orderId, status, message) {
-    if (currentOrderId == orderId) {
-      const statusText = status === 'completed' ? 'ПОДТВЕРЖДЁН' : 'ОТКЛОНЁН';
-      const statusColor = status === 'completed' ? '#22c55e' : '#ef4444';
-      const currentInfo = document.getElementById("info").innerHTML;
-      document.getElementById("info").innerHTML = currentInfo + 
-        `<br><br><span style="color: ${statusColor}; font-weight: bold;">${statusText}</span><br>${message}`;
+      `).join('');
     }
-    showError(message);
+    
+    if (response.action === 'order_status' && currentOrderId == response.order_id) {
+      const statusText = response.status === 'completed' ? 'ПОДТВЕРЖДЁН' : 'ОТКЛОНЁН';
+      const statusColor = response.status === 'completed' ? '#22c55e' : '#ef4444';
+      document.getElementById("info").innerHTML += 
+        `<br><br><span style="color: ${statusColor}; font-weight: bold;">${statusText}</span><br>${response.message}`;
+      showError(response.message);
+    }
   };
 
   document.addEventListener("click", function(e) {
@@ -647,16 +631,11 @@
     }
   }
 
-  // Проверка админа при загрузке
-  function checkAdmin() {
-    tg.sendData(JSON.stringify({ action: 'check_admin', user_id: currentUser.id }));
-  }
-
   window.addEventListener('load', () => {
     setTimeout(createRainOfKeys, 100);
-    checkAdmin();
     console.log('EGH SHOP загружен');
     console.log('Пользователь:', currentUser);
+    console.log('Админ:', isAdmin);
   });
 </script>
 
