@@ -22,7 +22,9 @@
 
     body {
       font-family: 'Nunito', sans-serif;
-      background: linear-gradient(135deg, #0f0c29, #1a1a3e, #24243e);
+      background: linear-gradient(-45deg, #05070f, #0b1220, #0f172a, #0b1b2e);
+      background-size: 400% 400%;
+      animation: bgMove 12s ease infinite;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -31,32 +33,10 @@
       overflow-x: hidden;
     }
 
-    /* Анимированный фон */
-    .bg-animation {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      overflow: hidden;
-    }
-
-    .orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(60px);
-      animation: float 20s infinite;
-    }
-
-    .orb-1 { width: 300px; height: 300px; background: rgba(56, 189, 248, 0.15); top: -100px; left: -100px; }
-    .orb-2 { width: 400px; height: 400px; background: rgba(139, 92, 246, 0.1); bottom: -150px; right: -150px; animation-delay: -5s; }
-    .orb-3 { width: 200px; height: 200px; background: rgba(236, 72, 153, 0.1); top: 50%; left: 50%; animation-delay: -10s; }
-
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      33% { transform: translate(30px, -30px) scale(1.1); }
-      66% { transform: translate(-20px, 20px) scale(0.9); }
+    @keyframes bgMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     /* Дождь из ключей */
@@ -221,17 +201,18 @@
     .status-completed { background: #22c55e; color: #fff; }
     .status-rejected { background: #ef4444; color: #fff; }
 
-    /* Баннер */
+    /* БАННЕР - как было */
     .banner {
       width: 100%;
       text-align: center;
-      padding: 20px;
-      font-size: 24px;
-      font-weight: 900;
-      letter-spacing: 2px;
-      background: rgba(0,0,0,0.3);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(56,189,248,0.2);
+      padding: 32px 20px;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      color: #e5e7eb;
+      text-shadow: 0 0 12px rgba(255,255,255,0.2), 0 0 25px rgba(56,189,248,0.25);
+      background: linear-gradient(90deg, #020409, #070b14, #020409);
+      border-bottom: 1px solid rgba(56,189,248,0.15);
       position: relative;
       z-index: 10;
     }
@@ -240,10 +221,10 @@
     .page {
       display: none;
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
+      margin-top: 25px;
       position: relative;
       z-index: 10;
     }
@@ -252,44 +233,57 @@
       display: flex;
     }
 
+    h1 {
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-shadow: 0 0 8px rgba(255,255,255,0.15);
+    }
+
     /* Картинка Steam */
     .steam-image {
       text-align: center;
-      margin: 10px 0 20px;
-      width: 100%;
+      margin: 20px 0 10px 0;
     }
 
     .steam-image img {
-      max-width: 85%;
+      max-width: 90%;
       height: auto;
-      border-radius: 20px;
-      box-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(56,189,248,0.3);
+      transition: transform 0.3s ease;
+    }
+
+    .steam-image img:hover {
+      transform: scale(1.02);
     }
 
     /* Карточка */
     .card {
       width: 100%;
-      background: rgba(15, 23, 42, 0.7);
-      backdrop-filter: blur(15px);
-      padding: 24px;
-      border-radius: 24px;
-      border: 1px solid rgba(56, 189, 248, 0.2);
+      background: rgba(30, 41, 59, 0.6);
+      padding: 22px;
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      border: 1px solid rgba(56,189,248,0.15);
+      box-shadow: 0 0 20px rgba(56,189,248,0.05);
+      backdrop-filter: blur(10px);
     }
 
     input {
-      width: 100%;
-      padding: 14px;
-      border-radius: 14px;
+      padding: 12px;
+      border-radius: 12px;
       border: 1px solid #334155;
       background: #0f172a;
-      color: #fff;
+      color: #e5e7eb;
       font-family: 'Nunito', sans-serif;
       font-size: 16px;
-      margin-bottom: 12px;
     }
 
     input:focus {
       border-color: #38bdf8;
+      box-shadow: 0 0 12px rgba(56,189,248,0.25);
       outline: none;
     }
 
@@ -302,27 +296,30 @@
       margin: 0;
     }
 
-    /* Дропдаун */
+    /* ДРОПДАУН - такой же стиль как баннер */
     .dropdown {
       position: relative;
       width: 100%;
-      margin-bottom: 12px;
     }
 
     .selected {
-      background: #0f172a;
-      border: 1px solid #334155;
-      padding: 14px;
-      border-radius: 14px;
+      background: linear-gradient(90deg, #020409, #070b14, #020409);
+      border: 1px solid rgba(56,189,248,0.15);
+      padding: 12px;
+      border-radius: 12px;
       cursor: pointer;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      color: #e5e7eb;
+      font-weight: 600;
+      text-shadow: 0 0 8px rgba(56,189,248,0.2);
     }
 
     .selected::after {
       content: "▼";
       font-size: 12px;
-      color: #94a3b8;
+      color: #38bdf8;
     }
 
     .options {
@@ -330,7 +327,8 @@
       top: 110%;
       left: 0;
       right: 0;
-      background: #1e293b;
+      background: linear-gradient(90deg, #020409, #070b14, #020409);
+      border: 1px solid rgba(56,189,248,0.2);
       border-radius: 14px;
       max-height: 0;
       overflow: hidden;
@@ -346,59 +344,66 @@
       padding: 12px;
       cursor: pointer;
       transition: 0.2s;
+      color: #e5e7eb;
     }
 
     .option:hover {
-      background: #334155;
+      background: rgba(56,189,248,0.15);
       color: #38bdf8;
     }
 
     .btn {
-      width: 100%;
-      padding: 14px;
+      margin-top: 10px;
+      padding: 13px;
       border: none;
-      border-radius: 14px;
-      font-weight: 800;
-      font-size: 16px;
-      background: linear-gradient(90deg, #38bdf8, #818cf8);
-      color: #fff;
+      border-radius: 12px;
       cursor: pointer;
+      font-weight: 800;
+      font-family: 'Nunito', sans-serif;
+      font-size: 16px;
+      background: linear-gradient(90deg, #38bdf8, #60a5fa);
+      color: #020617;
       transition: 0.2s;
-      margin-top: 5px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
     }
 
     .btn:active {
-      transform: scale(0.98);
+      transform: translateY(0);
     }
 
     .qr {
       width: 200px;
       height: 200px;
       background: white;
-      border-radius: 20px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 20px auto;
-      color: #000;
+      color: black;
       font-weight: bold;
+      margin: 0 auto;
     }
 
     .info {
-      background: rgba(0,0,0,0.4);
-      padding: 15px;
-      border-radius: 14px;
+      margin-top: 10px;
+      color: #94a3b8;
       text-align: center;
-      font-size: 14px;
-      margin: 15px 0;
+      white-space: pre-line;
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      border-radius: 12px;
     }
 
     .back {
-      text-align: center;
+      margin-top: 20px;
       cursor: pointer;
       color: #94a3b8;
+      text-align: center;
       padding: 10px;
-      transition: 0.2s;
+      transition: 0.15s;
     }
 
     .back:hover {
@@ -410,47 +415,35 @@
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background: #ef4444;
-      padding: 12px 20px;
-      border-radius: 50px;
+      background: rgba(239,68,68,0.95);
+      padding: 12px 18px;
+      border-radius: 10px;
       z-index: 1000;
+      font-weight: 600;
       animation: slideUp 0.3s ease;
     }
 
     @keyframes slideUp {
       from {
-        opacity: 0;
         transform: translateX(-50%) translateY(100%);
+        opacity: 0;
       }
       to {
-        opacity: 1;
         transform: translateX(-50%) translateY(0);
+        opacity: 1;
       }
-    }
-
-    /* Загрузка */
-    .loading {
-      text-align: center;
-      padding: 20px;
-      color: #94a3b8;
     }
 
     /* Адаптив */
     @media (max-width: 480px) {
-      .banner { font-size: 18px; padding: 15px; }
-      .card { padding: 18px; }
+      .banner { font-size: 22px; padding: 20px; }
+      .steam-image img { max-width: 85%; }
       .admin-btn { top: 60px; right: 10px; width: 40px; height: 40px; font-size: 18px; }
     }
   </style>
 </head>
 
 <body>
-
-<div class="bg-animation">
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-</div>
 
 <!-- Кнопка админ-панели -->
 <div id="adminBtn" class="admin-btn" style="display: none;" onclick="openAdminPanel()">
@@ -470,17 +463,17 @@
   </div>
 </div>
 
-<div class="banner">⚡ EGH SHOP ⚡</div>
+<div class="banner">EGH SHOP</div>
 
-<!-- Главная страница -->
 <div class="page active" id="home">
   <div class="steam-image">
     <img src="image.png" alt="Steam Пополнение" draggable="false">
   </div>
+
   <div class="card">
-    <input type="text" id="login" placeholder="🔑 Логин Steam" autocomplete="off">
-    <input type="number" id="amount" placeholder="💰 Сумма" step="1" min="1">
-    
+    <input id="login" placeholder="Логин Steam">
+    <input id="amount" type="number" placeholder="Сумма" step="1" min="1">
+
     <div class="dropdown" id="dropdown">
       <div class="selected" onclick="toggleDropdown()">RUB ₽</div>
       <div class="options">
@@ -488,17 +481,16 @@
         <div class="option" onclick="selectCurrency('KZT','₸')">KZT ₸</div>
       </div>
     </div>
-    
-    <button class="btn" onclick="pay()">💳 ОПЛАТИТЬ</button>
+
+    <button class="btn" onclick="pay()">Оплатить</button>
   </div>
 </div>
 
-<!-- Страница оплаты -->
 <div class="page" id="pay">
-  <h2 style="margin-bottom: 15px;">💸 Ожидание оплаты</h2>
-  <div class="qr">💳 QR-код</div>
+  <h1>Оплата</h1>
+  <div class="qr">QR CODE</div>
   <div class="info" id="info"></div>
-  <div class="back" onclick="openPage('home')">← Назад в магазин</div>
+  <div class="back" onclick="openPage('home')">← Назад</div>
 </div>
 
 <script>
@@ -519,7 +511,6 @@
     document.getElementById('adminBtn').style.display = 'flex';
   }
 
-  // Сохраняем текущий заказ для отслеживания статуса
   let currentOrderId = null;
 
   function openPage(id) {
@@ -531,12 +522,8 @@
     const login = document.getElementById("login").value.trim();
     const amount = document.getElementById("amount").value.trim();
 
-    if (!login) {
-      showError("❌ Введите логин Steam");
-      return;
-    }
-    if (!amount || amount <= 0) {
-      showError("❌ Введите корректную сумму");
+    if (!login || !amount || amount <= 0) {
+      showError("Проверь данные");
       return;
     }
 
@@ -555,17 +542,10 @@
       status: 'pending'
     };
 
-    // Отправляем боту
     tg.sendData(JSON.stringify(orderData));
 
-    // Показываем информацию
-    document.getElementById("info").innerHTML = `
-      🧑 Покупатель: @${orderData.username}<br>
-      🎮 Логин: ${login}<br>
-      💵 Сумма: ${amount} ${symbol}<br>
-      📊 Статус: <span style="color: #f59e0b;">⏳ Ожидает подтверждения</span><br><br>
-      После оплаты ожидайте подтверждения от администратора.
-    `;
+    document.getElementById("info").innerText = 
+      `Логин: ${login}\nСумма: ${amount} ${symbol}\n\n⏳ Ожидает подтверждения`;
 
     openPage('pay');
   }
@@ -584,12 +564,15 @@
   function showError(text) {
     const div = document.createElement("div");
     div.className = "error";
-    div.innerHTML = text;
+    div.innerText = "❌ " + text;
     document.body.appendChild(div);
-    setTimeout(() => div.remove(), 2500);
+    setTimeout(() => {
+      div.style.opacity = '0';
+      setTimeout(() => div.remove(), 300);
+    }, 2500);
   }
 
-  // ========== АДМИН-ПАНЕЛЬ ==========
+  // Админ-панель
   function openAdminPanel() {
     if (!isAdmin) return;
     document.getElementById('adminModal').classList.add('active');
@@ -602,27 +585,18 @@
 
   function loadOrders() {
     const ordersList = document.getElementById('ordersList');
-    ordersList.innerHTML = '<div class="loading">📡 Загрузка заказов...</div>';
-    
-    // Запрашиваем заказы у бота
+    ordersList.innerHTML = '<div class="loading">Загрузка заказов...</div>';
     tg.sendData(JSON.stringify({ action: 'get_orders' }));
   }
 
   function approveOrder(orderId) {
-    tg.sendData(JSON.stringify({
-      action: 'approve_order',
-      order_id: orderId
-    }));
+    tg.sendData(JSON.stringify({ action: 'approve_order', order_id: orderId }));
   }
 
   function rejectOrder(orderId) {
-    tg.sendData(JSON.stringify({
-      action: 'reject_order',
-      order_id: orderId
-    }));
+    tg.sendData(JSON.stringify({ action: 'reject_order', order_id: orderId }));
   }
 
-  // Функции, которые вызываются из бота
   window.updateOrdersList = function(orders) {
     const ordersList = document.getElementById('ordersList');
     if (!orders || orders.length === 0) {
@@ -653,14 +627,8 @@
 
   window.updateOrderStatus = function(orderId, status, message, amount, symbol) {
     if (currentOrderId == orderId) {
-      const statusText = status === 'completed' ? '✅ ВЫПОЛНЕН' : '❌ ОТКЛОНЁН';
-      const statusColor = status === 'completed' ? '#22c55e' : '#ef4444';
-      document.getElementById("info").innerHTML = `
-        🧑 Ваш заказ #${orderId}<br>
-        💵 Сумма: ${amount} ${symbol}<br>
-        📊 Статус: <span style="color: ${statusColor}; font-weight: bold;">${statusText}</span><br><br>
-        ${message}
-      `;
+      document.getElementById("info").innerText = 
+        `Логин: ${login}\nСумма: ${amount} ${symbol}\n\n${message}`;
     }
     showError(message);
   };
@@ -683,7 +651,7 @@
   // Запрет перетаскивания
   document.addEventListener('dragstart', (e) => e.preventDefault());
 
-  // ========== ДОЖДЬ ИЗ КЛЮЧЕЙ ==========
+  // Дождь из ключей
   function createRainOfKeys() {
     const keyCount = 35;
     for(let i = 0; i < keyCount; i++) {
@@ -733,8 +701,6 @@
   });
 
   console.log('✅ EGH SHOP загружен');
-  console.log(`👤 Пользователь: ${currentUser.username || currentUser.id}`);
-  console.log(`👑 Админ: ${isAdmin ? 'ДА' : 'НЕТ'}`);
 </script>
 
 </body>
