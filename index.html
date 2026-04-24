@@ -439,9 +439,14 @@
   const ADMIN_ID = 1641610032;
   const isAdmin = currentUser.id === ADMIN_ID;
 
+  // Локальное хранилище заказов
+  let localOrders = JSON.parse(localStorage.getItem('egh_orders') || '{}');
+
   // Показываем кнопку админа
   if (isAdmin) {
     document.getElementById('adminBtn').style.display = 'flex';
+    // Загружаем заказы при старте
+    loadOrdersFromStorage();
   }
 
   function goBack() {
@@ -482,22 +487,20 @@
       status: 'pending'
     };
 
+    // Сохраняем локально
+    localOrders[currentOrderId] = orderData;
+    localStorage.setItem('egh_orders', JSON.stringify(localOrders));
+
     // Отправляем боту
-    try {
-      tg.sendData(JSON.stringify(orderData));
-      console.log("Заказ отправлен:", orderData);
-    } catch(e) {
-      console.error("Ошибка отправки:", e);
-      showError("Ошибка отправки заказа");
-      return;
-    }
+    tg.sendData(JSON.stringify(orderData));
 
     // Показываем статус
     document.getElementById("info").innerHTML = 
       `🧑 Покупатель: @${orderData.username}<br>` +
       `🎮 Логин: ${login}<br>` +
       `💵 Сумма: ${amount} ${symbol}<br><br>` +
-      `🟡 Статус: Ожидает подтверждения`;
+      `🟡 Статус: Ожидает подтверждения<br><br>` +
+      `📢 Уведомление отправлено администратору`;
 
     openPage('pay');
   }
@@ -528,65 +531,108 @@
   function openAdminPanel() {
     if (!isAdmin) return;
     document.getElementById('adminModal').classList.add('active');
-    loadOrders();
+    loadOrdersFromStorage();
   }
 
   function closeAdminPanel() {
     document.getElementById('adminModal').classList.remove('active');
   }
 
-  function loadOrders() {
-    tg.sendData(JSON.stringify({ action: 'get_orders' }));
+  function loadOrdersFromStorage() {
+    const ordersList = document.getElementById('ordersList');
+    const pendingOrders = Object.values(localOrders).filter(order => order.status === 'pending');
+    
+    if (pendingOrders.length === 0) {
+      ordersList.innerHTML = '<div style="text-align: center; padding: 40px;">📭 Нет активных заказов</div>';
+      return;
+    }
+
+    ordersList.innerHTML = pendingOrders.map(order => `
+      <div class="order-card" id="order_${order.order_id}">
+        <div class="order-info">
+          <p><strong>🆔 Заказ:</strong> #${order.order_id}</p>
+          <p><strong>👤 Покупатель:</strong> @${order.username}</p>
+          <p><strong>🎮 Логин Steam:</strong> ${order.login}</p>
+          <p><strong>💰 Сумма:</strong> ${order.amount} ${order.symbol}</p>
+          <p><strong>💱 Валюта:</strong> ${order.currency}</p>
+          <p><strong>📅 Время:</strong> ${order.timestamp}</p>
+        </div>
+        <div class="order-actions">
+          <button class="confirm-btn" onclick="approveOrder('${order.order_id}')">✅ Подтвердить</button>
+          <button class="reject-btn" onclick="rejectOrder('${order.order_id}')">❌ Отклонить</button>
+        </div>
+      </div>
+    `).join('');
   }
 
   function approveOrder(orderId) {
-    tg.sendData(JSON.stringify({ action: 'approve_order', order_id: orderId, admin_id: currentUser.id }));
+    const order = localOrders[orderId];
+    if (!order) {
+      showError("Заказ не найден");
+      return;
+    }
+    
+    order.status = 'completed';
+    localStorage.setItem('egh_orders', JSON.stringify(localOrders));
+    
+    // Отправляем уведомление боту
+    tg.sendData(JSON.stringify({
+      action: 'approve_order',
+      order_id: orderId,
+      user_id: order.user_id,
+      amount: order.amount,
+      symbol: order.symbol,
+      login: order.login
+    }));
+    
+    // Обновляем отображение
+    loadOrdersFromStorage();
+    showError(`✅ Заказ #${orderId} подтверждён!`);
+    
+    // Если это текущий заказ пользователя
+    if (currentOrderId == orderId) {
+      document.getElementById("info").innerHTML = 
+        `🧑 Покупатель: @${order.username}<br>` +
+        `🎮 Логин: ${order.login}<br>` +
+        `💰 Сумма: ${order.amount} ${order.symbol}<br><br>` +
+        `✅ <span style="color: #22c55e; font-weight: bold;">ЗАКАЗ ПОДТВЕРЖДЁН!</span><br><br>` +
+        `🎉 Спасибо за покупку!`;
+    }
   }
 
   function rejectOrder(orderId) {
-    tg.sendData(JSON.stringify({ action: 'reject_order', order_id: orderId, admin_id: currentUser.id }));
+    const order = localOrders[orderId];
+    if (!order) {
+      showError("Заказ не найден");
+      return;
+    }
+    
+    order.status = 'rejected';
+    localStorage.setItem('egh_orders', JSON.stringify(localOrders));
+    
+    // Отправляем уведомление боту
+    tg.sendData(JSON.stringify({
+      action: 'reject_order',
+      order_id: orderId,
+      user_id: order.user_id,
+      amount: order.amount,
+      symbol: order.symbol
+    }));
+    
+    // Обновляем отображение
+    loadOrdersFromStorage();
+    showError(`❌ Заказ #${orderId} отклонён!`);
+    
+    // Если это текущий заказ пользователя
+    if (currentOrderId == orderId) {
+      document.getElementById("info").innerHTML = 
+        `🧑 Покупатель: @${order.username}<br>` +
+        `🎮 Логин: ${order.login}<br>` +
+        `💰 Сумма: ${order.amount} ${order.symbol}<br><br>` +
+        `❌ <span style="color: #ef4444; font-weight: bold;">ЗАКАЗ ОТКЛОНЁН</span><br><br>` +
+        `💸 Средства возвращены на баланс.`;
+    }
   }
-
-  // Получение ответов от бота
-  window.handleBotResponse = function(response) {
-    console.log("Ответ от бота:", response);
-    
-    if (response.action === 'orders_list') {
-      const ordersList = document.getElementById('ordersList');
-      const orders = response.orders;
-      const pendingOrders = orders.filter(o => o.status === 'pending');
-      
-      if (pendingOrders.length === 0) {
-        ordersList.innerHTML = '<div style="text-align: center; padding: 40px;">Нет активных заказов</div>';
-        return;
-      }
-
-      ordersList.innerHTML = pendingOrders.map(order => `
-        <div class="order-card">
-          <div class="order-info">
-            <p><strong>Заказ:</strong> #${order.order_id}</p>
-            <p><strong>Покупатель:</strong> @${order.username}</p>
-            <p><strong>Логин Steam:</strong> ${order.login}</p>
-            <p><strong>Сумма:</strong> ${order.amount} ${order.symbol}</p>
-            <p><strong>Валюта:</strong> ${order.currency}</p>
-            <p><strong>Время:</strong> ${order.timestamp}</p>
-          </div>
-          <div class="order-actions">
-            <button class="confirm-btn" onclick="approveOrder('${order.order_id}')">✅ Подтвердить</button>
-            <button class="reject-btn" onclick="rejectOrder('${order.order_id}')">❌ Отклонить</button>
-          </div>
-        </div>
-      `).join('');
-    }
-    
-    if (response.action === 'order_status' && currentOrderId == response.order_id) {
-      const statusText = response.status === 'completed' ? 'ПОДТВЕРЖДЁН' : 'ОТКЛОНЁН';
-      const statusColor = response.status === 'completed' ? '#22c55e' : '#ef4444';
-      document.getElementById("info").innerHTML += 
-        `<br><br><span style="color: ${statusColor}; font-weight: bold;">${statusText}</span><br>${response.message}`;
-      showError(response.message);
-    }
-  };
 
   document.addEventListener("click", function(e) {
     const dropdown = document.getElementById("dropdown");
