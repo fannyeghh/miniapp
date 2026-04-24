@@ -44,8 +44,8 @@
       100% { background-position: 0% 50%; }
     }
 
-    /* Летающие элементы - летят по диагонали */
-    .flying-item {
+    /* Дождь из ключей */
+    .rain-key {
       position: fixed;
       pointer-events: none;
       z-index: 0;
@@ -54,46 +54,27 @@
       opacity: 0;
     }
     
-    .flying-item img {
+    .rain-key img {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      filter: drop-shadow(0 0 10px rgba(56,189,248,0.4));
-      transition: filter 0.3s ease;
+      filter: drop-shadow(0 0 8px rgba(56,189,248,0.3));
     }
     
-    /* Анимация полёта по диагонали (сверху-справа → снизу-слева) */
-    @keyframes flyDiagonal {
+    /* Анимация падения по диагонали как дождь */
+    @keyframes rainDiagonal {
       0% {
-        transform: translate(0, 0) rotate(0deg);
+        transform: translate(0, -20vh) rotate(0deg);
         opacity: 0;
       }
-      10% {
-        opacity: 0.7;
+      5% {
+        opacity: 0.6;
       }
-      90% {
-        opacity: 0.7;
+      95% {
+        opacity: 0.6;
       }
       100% {
-        transform: translate(-120vw, 120vh) rotate(360deg);
-        opacity: 0;
-      }
-    }
-    
-    /* Анимация полёта в другую сторону для разнообразия */
-    @keyframes flyDiagonalReverse {
-      0% {
-        transform: translate(0, 0) rotate(0deg);
-        opacity: 0;
-      }
-      10% {
-        opacity: 0.7;
-      }
-      90% {
-        opacity: 0.7;
-      }
-      100% {
-        transform: translate(-100vw, 100vh) rotate(-360deg);
+        transform: translate(30vw, 120vh) rotate(180deg);
         opacity: 0;
       }
     }
@@ -141,6 +122,8 @@
       border-radius: 16px;
       box-shadow: 0 0 20px rgba(56,189,248,0.3);
       transition: transform 0.3s ease;
+      position: relative;
+      z-index: 2;
     }
 
     .steam-image img:hover {
@@ -149,7 +132,7 @@
 
     .card {
       width: 100%;
-      background: rgba(30, 41, 59, 0.7);
+      background: rgba(30, 41, 59, 0.85);
       padding: 22px;
       border-radius: 18px;
       display: flex;
@@ -158,6 +141,8 @@
       border: 1px solid rgba(56,189,248,0.2);
       box-shadow: 0 0 20px rgba(56,189,248,0.05);
       backdrop-filter: blur(10px);
+      position: relative;
+      z-index: 2;
     }
 
     input {
@@ -435,122 +420,88 @@
     }
   });
 
-  // ========== ЛЕТАЮЩИЕ КЛЮЧИ (диагональная анимация) ==========
+  // ========== ДОЖДЬ ИЗ КЛЮЧЕЙ ==========
   
-  function createFlyingKeys() {
-    const keyCount = 15; // Количество летающих ключей
+  function createRainOfKeys() {
+    const keyCount = 40; // 40 ключей для эффекта дождя
     
     for(let i = 0; i < keyCount; i++) {
       const keyDiv = document.createElement('div');
-      keyDiv.className = 'flying-item';
+      keyDiv.className = 'rain-key';
       
       // Создаём img элемент
       const img = document.createElement('img');
-      img.src = 'key.png'; // Ваш файл ключа
+      img.src = 'key.png';
       img.alt = 'Steam Key';
       
-      // Проверка загрузки изображения
+      // Fallback если картинка не загрузилась
       img.onerror = function() {
-        console.warn('Не удалось загрузить key.png, используем эмодзи');
-        keyDiv.innerHTML = '🔑'; // Fallback на эмодзи
+        keyDiv.innerHTML = '🔑';
         keyDiv.style.fontSize = size + 'px';
         keyDiv.style.display = 'flex';
         keyDiv.style.alignItems = 'center';
         keyDiv.style.justifyContent = 'center';
+        keyDiv.style.textShadow = '0 0 5px #38bdf8';
       };
       
       keyDiv.appendChild(img);
       
-      // Случайный размер от 30px до 80px
-      const size = Math.random() * 50 + 30;
+      // Случайный размер (разные ключи)
+      const size = Math.random() * 45 + 25; // 25-70px
       keyDiv.style.width = size + 'px';
       keyDiv.style.height = size + 'px';
       
-      // Стартовая позиция (правый верхний угол с вариациями)
-      const startX = 80 + Math.random() * 20; // 80-100% (правая сторона)
-      const startY = Math.random() * 30; // 0-30% (верхняя часть)
+      // Случайная позиция по X (по всей ширине экрана)
+      const startX = Math.random() * 100; // 0-100%
       keyDiv.style.left = startX + '%';
-      keyDiv.style.top = startY + '%';
       
-      // Случайная задержка начала анимации
-      const delay = Math.random() * 15; // 0-15 секунд
+      // Все начинают сверху (за экраном)
+      keyDiv.style.top = '-20vh';
       
-      // Случайная длительность полёта
-      const duration = Math.random() * 8 + 6; // 6-14 секунд
+      // Случайная задержка (чтобы не падали все одновременно)
+      const delay = Math.random() * 20; // 0-20 секунд
       
-      // Выбираем направление анимации (прямое или обратное)
-      const animationType = Math.random() > 0.7 ? 'flyDiagonalReverse' : 'flyDiagonal';
+      // Скорость падения (чем меньше число, тем быстрее)
+      const duration = Math.random() * 6 + 4; // 4-10 секунд
       
-      // Применяем анимацию
-      keyDiv.style.animation = `${animationType} ${duration}s linear ${delay}s infinite`;
+      // Наклон падения (разные углы для разных ключей)
+      const tilt = Math.random() * 60 + 20; // 20-80px смещения по X
       
-      // Случайное вращение в начале
-      const startRotate = Math.random() * 360;
-      keyDiv.style.transform = `rotate(${startRotate}deg)`;
+      // Индивидуальная анимация для каждого ключа
+      const animationName = `rain_${i}`;
+      const styleSheet = document.createElement('style');
+      styleSheet.textContent = `
+        @keyframes ${animationName} {
+          0% {
+            transform: translate(0, -20vh) rotate(0deg);
+            opacity: 0;
+          }
+          10% {
+            opacity: 0.7;
+          }
+          90% {
+            opacity: 0.7;
+          }
+          100% {
+            transform: translate(${tilt}px, 120vh) rotate(${Math.random() * 360}deg);
+            opacity: 0;
+          }
+        }
+      `;
+      document.head.appendChild(styleSheet);
       
-      // Добавляем эффект вращения для некоторых ключей
-      if (Math.random() > 0.5) {
-        keyDiv.classList.add('spin');
-      }
+      keyDiv.style.animation = `${animationName} ${duration}s linear ${delay}s infinite`;
       
       document.body.appendChild(keyDiv);
     }
   }
   
-  // Добавляем CSS для вращения
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes flyDiagonal {
-      0% {
-        transform: translate(0, 0) rotate(0deg);
-        opacity: 0;
-      }
-      10% {
-        opacity: 0.8;
-      }
-      90% {
-        opacity: 0.8;
-      }
-      100% {
-        transform: translate(-120vw, 110vh) rotate(360deg);
-        opacity: 0;
-      }
-    }
-    
-    @keyframes flyDiagonalReverse {
-      0% {
-        transform: translate(0, 0) rotate(0deg);
-        opacity: 0;
-      }
-      10% {
-        opacity: 0.8;
-      }
-      90% {
-        opacity: 0.8;
-      }
-      100% {
-        transform: translate(-100vw, 100vh) rotate(-360deg);
-        opacity: 0;
-      }
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    .flying-item.spin img {
-      animation: spin 3s linear infinite;
-    }
-  `;
-  document.head.appendChild(style);
-  
-  // Запускаем создание летающих ключей после загрузки страницы
+  // Запускаем дождь из ключей после загрузки
   window.addEventListener('load', function() {
-    setTimeout(createFlyingKeys, 100);
+    setTimeout(createRainOfKeys, 100);
   });
   
-  console.log("🗝️ EGH SHOP: Летающие ключи активированы!");
+  console.log("🗝️ Дождь из ключей активирован! 40 ключей падают по всей ширине экрана");
 </script>
 
 </body>
