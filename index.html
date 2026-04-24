@@ -6,66 +6,52 @@
 
   <title>EGH SHOP</title>
 
-  <!-- 🔥 ШРИФТ -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Telegram WebApp -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
     * {
       box-sizing: border-box;
       -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }
 
     body {
       margin: 0;
       font-family: 'Nunito', sans-serif;
       color: #e5e7eb;
-
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-
-      background: linear-gradient(-45deg, #05070f, #0b1220, #0f172a, #0b1b2e);
-      background-size: 400% 400%;
-      animation: bgMove 12s ease infinite;
+      background: #020617;
+      overflow-x: hidden;
     }
 
-    @keyframes bgMove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
     }
 
-    /* 🔥 БАННЕР */
+    /* 🔥 БАННЕР КАК КАРТИНКА */
     .banner {
       width: 100%;
-      text-align: center;
-      padding: 32px 20px;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
 
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: 3px;
-
-      color: #e5e7eb;
-
-      text-shadow:
-        0 0 12px rgba(255,255,255,0.2),
-        0 0 25px rgba(56,189,248,0.25);
-
-      background: linear-gradient(90deg, #020409, #070b14, #020409);
-      border-bottom: 1px solid rgba(56,189,248,0.15);
+    .banner img {
+      width: 100%;
+      max-width: 900px;
+      border-radius: 18px;
     }
 
     .page {
       display: none;
       width: 100%;
       max-width: 420px;
+      margin: auto;
+      padding: 20px;
       flex-direction: column;
       align-items: center;
-      margin-top: 25px;
     }
 
     .active {
@@ -75,39 +61,31 @@
     h1 {
       font-weight: 800;
       letter-spacing: 1px;
-
-      text-shadow:
-        0 0 8px rgba(255,255,255,0.15);
     }
 
     .card {
       width: 100%;
-      background: rgba(30, 41, 59, 0.6);
+      background: rgba(15, 23, 42, 0.7);
       padding: 22px;
       border-radius: 18px;
-
       display: flex;
       flex-direction: column;
       gap: 12px;
-
-      border: 1px solid rgba(56,189,248,0.15);
-      box-shadow: 0 0 20px rgba(56,189,248,0.05);
       backdrop-filter: blur(10px);
+      border: 1px solid rgba(56,189,248,0.15);
     }
 
     input {
       padding: 12px;
       border-radius: 12px;
       border: 1px solid #334155;
-      background: #0f172a;
+      background: #020617;
       color: #e5e7eb;
-
       font-family: 'Nunito', sans-serif;
     }
 
     input:focus {
       border-color: #38bdf8;
-      box-shadow: 0 0 12px rgba(56,189,248,0.25);
       outline: none;
     }
 
@@ -117,28 +95,18 @@
       border: none;
       border-radius: 12px;
       cursor: pointer;
-
       font-weight: 800;
-      font-family: 'Nunito', sans-serif;
-
       background: linear-gradient(90deg, #38bdf8, #60a5fa);
       color: #020617;
-
-      transition: 0.2s;
     }
 
-    .btn:hover {
-      transform: translateY(-2px);
-    }
-
-    /* 💱 ДРОПДАУН */
     .dropdown {
       position: relative;
       width: 100%;
     }
 
     .selected {
-      background: #0f172a;
+      background: #020617;
       border: 1px solid #334155;
       padding: 12px;
       border-radius: 12px;
@@ -147,23 +115,17 @@
 
     .options {
       position: absolute;
-      top: 110%;
       width: 100%;
-
-      background: rgba(15, 23, 42, 0.98);
+      background: #020617;
       border: 1px solid rgba(56,189,248,0.2);
-      border-radius: 14px;
-
+      border-radius: 12px;
       max-height: 0;
       overflow: hidden;
-      opacity: 0;
-
       transition: 0.25s;
     }
 
     .dropdown.active .options {
       max-height: 200px;
-      opacity: 1;
     }
 
     .option {
@@ -173,7 +135,6 @@
 
     .option:hover {
       background: rgba(56,189,248,0.15);
-      color: #38bdf8;
     }
 
     .qr {
@@ -181,11 +142,9 @@
       height: 200px;
       background: white;
       border-radius: 12px;
-
       display: flex;
       align-items: center;
       justify-content: center;
-
       color: black;
       font-weight: bold;
     }
@@ -208,7 +167,6 @@
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-
       background: rgba(239,68,68,0.9);
       padding: 12px 18px;
       border-radius: 10px;
@@ -218,8 +176,14 @@
 
 <body>
 
-<div class="banner">EGH SHOP</div>
+<canvas id="bg"></canvas>
 
+<!-- 🔥 КАРТИНКА ВМЕСТО БАННЕРА -->
+<div class="banner">
+  <img src="steam-banner.png" alt="Steam banner">
+</div>
+
+<!-- 🏠 HOME -->
 <div class="page active" id="home">
 
   <h1>Пополнение Steam</h1>
@@ -242,6 +206,7 @@
   </div>
 </div>
 
+<!-- 💳 PAY -->
 <div class="page" id="pay">
   <h1>Оплата</h1>
 
@@ -253,62 +218,110 @@
 </div>
 
 <script>
-  const tg = window.Telegram.WebApp;
-  tg.expand();
+const tg = window.Telegram.WebApp;
+tg.expand();
 
-  let currency = "RUB";
-  let symbol = "₽";
+let currency = "RUB";
+let symbol = "₽";
 
-  function openPage(id) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+function openPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function pay() {
+  const login = document.getElementById("login").value.trim();
+  const amount = document.getElementById("amount").value.trim();
+
+  if (!login || !amount || amount <= 0) {
+    showError("Проверь данные");
+    return;
   }
 
-  function pay() {
-    const login = document.getElementById("login").value.trim();
-    const amount = document.getElementById("amount").value.trim();
+  const data = { login, amount, currency };
 
-    if (!login || !amount || amount <= 0) {
-      showError("Проверь данные");
-      return;
-    }
+  tg.sendData(JSON.stringify(data));
 
-    const data = { login, amount, currency };
+  document.getElementById("info").innerText =
+    `Логин: ${login}\nСумма: ${amount} ${symbol}`;
 
-    tg.sendData(JSON.stringify(data));
+  openPage('pay');
+}
 
-    document.getElementById("info").innerText =
-      `Логин: ${login}\nСумма: ${amount} ${symbol}`;
+function toggleDropdown() {
+  document.getElementById("dropdown").classList.toggle("active");
+}
 
-    openPage('pay');
-  }
+function selectCurrency(cur, sym) {
+  currency = cur;
+  symbol = sym;
+  document.querySelector(".selected").innerText = cur + " " + sym;
+  document.getElementById("dropdown").classList.remove("active");
+}
 
-  function toggleDropdown() {
-    document.getElementById("dropdown").classList.toggle("active");
-  }
+function showError(text) {
+  const div = document.createElement("div");
+  div.className = "error";
+  div.innerText = text;
 
-  function selectCurrency(cur, sym) {
-    currency = cur;
-    symbol = sym;
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 2000);
+}
 
-    document.querySelector(".selected").innerText = cur + " " + sym;
+document.addEventListener("click", function(e) {
+  if (!document.getElementById("dropdown").contains(e.target)) {
     document.getElementById("dropdown").classList.remove("active");
   }
+});
 
-  function showError(text) {
-    const div = document.createElement("div");
-    div.className = "error";
-    div.innerText = text;
+/* 🌊 ФОН (без мышки) */
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
 
-    document.body.appendChild(div);
-    setTimeout(() => div.remove(), 2000);
+let w,h;
+function resize(){
+  w=canvas.width=window.innerWidth;
+  h=canvas.height=window.innerHeight;
+}
+resize();
+window.addEventListener("resize",resize);
+
+let particles=[];
+
+for(let i=0;i<40;i++){
+  particles.push({
+    x:Math.random()*w,
+    y:Math.random()*h,
+    vx:(Math.random()-0.5)*2,
+    vy:(Math.random()-0.5)*2,
+    size:Math.random()*200+100
+  });
+}
+
+function draw(){
+  ctx.clearRect(0,0,w,h);
+
+  for(let p of particles){
+    p.x+=p.vx;
+    p.y+=p.vy;
+
+    if(p.x<0||p.x>w) p.vx*=-1;
+    if(p.y<0||p.y>h) p.vy*=-1;
+
+    let g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.size);
+    g.addColorStop(0,"rgba(56,189,248,0.25)");
+    g.addColorStop(0.5,"rgba(14,165,233,0.15)");
+    g.addColorStop(1,"transparent");
+
+    ctx.fillStyle=g;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+    ctx.fill();
   }
 
-  document.addEventListener("click", function(e) {
-    if (!document.getElementById("dropdown").contains(e.target)) {
-      document.getElementById("dropdown").classList.remove("active");
-    }
-  });
+  requestAnimationFrame(draw);
+}
+draw();
 </script>
 
 </body>
