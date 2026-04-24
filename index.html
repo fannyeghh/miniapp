@@ -14,6 +14,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      user-select: none;
     }
 
     body {
@@ -38,7 +39,7 @@
     .rain-key {
       position: fixed;
       pointer-events: none;
-      z-index: 1;
+      z-index: 0;
       user-select: none;
       opacity: 0;
     }
@@ -68,6 +69,10 @@
       transition: all 0.3s ease;
       font-size: 22px;
       backdrop-filter: blur(10px);
+    }
+
+    .admin-btn:hover {
+      transform: scale(1.1);
     }
 
     .admin-modal {
@@ -203,6 +208,7 @@
       height: auto;
       border-radius: 16px;
       box-shadow: 0 0 20px rgba(56,189,248,0.3);
+      pointer-events: none;
     }
 
     .card {
@@ -309,8 +315,8 @@
       transition: 0.2s;
     }
 
-    .btn:hover {
-      transform: translateY(-2px);
+    .btn:active {
+      transform: scale(0.98);
     }
 
     .qr {
@@ -430,6 +436,8 @@
 <script>
   const tg = window.Telegram.WebApp;
   tg.expand();
+  
+  // НЕ используем enableClosingConfirmation - она может вызывать проблемы
 
   let currency = "RUB";
   let symbol = "₽";
@@ -445,11 +453,13 @@
   // Показываем кнопку админа
   if (isAdmin) {
     document.getElementById('adminBtn').style.display = 'flex';
-    // Загружаем заказы при старте
     loadOrdersFromStorage();
   }
 
   function goBack() {
+    // Очищаем форму
+    document.getElementById("login").value = "";
+    document.getElementById("amount").value = "";
     openPage('home');
   }
 
@@ -475,7 +485,6 @@
     currentOrderId = Date.now();
 
     const orderData = {
-      action: 'new_order',
       order_id: currentOrderId,
       login: login,
       amount: amount,
@@ -491,8 +500,15 @@
     localOrders[currentOrderId] = orderData;
     localStorage.setItem('egh_orders', JSON.stringify(localOrders));
 
-    // Отправляем боту
-    tg.sendData(JSON.stringify(orderData));
+    // Отправляем уведомление боту (если получится - хорошо, если нет - заказ всё равно сохранён)
+    try {
+      tg.sendData(JSON.stringify({
+        action: 'new_order',
+        ...orderData
+      }));
+    } catch(e) {
+      console.log("Ошибка отправки в бот, но заказ сохранён:", e);
+    }
 
     // Показываем статус
     document.getElementById("info").innerHTML = 
@@ -500,9 +516,16 @@
       `🎮 Логин: ${login}<br>` +
       `💵 Сумма: ${amount} ${symbol}<br><br>` +
       `🟡 Статус: Ожидает подтверждения<br><br>` +
-      `📢 Уведомление отправлено администратору`;
+      `📢 Администратор уведомлён`;
 
     openPage('pay');
+    
+    // Показываем попап что заказ создан
+    tg.showPopup({
+      title: "Заказ создан",
+      message: `Ваш заказ на ${amount} ${symbol} отправлен!\nОжидайте подтверждения.`,
+      buttons: [{type: "ok"}]
+    });
   }
 
   function toggleDropdown() {
@@ -576,14 +599,18 @@
     localStorage.setItem('egh_orders', JSON.stringify(localOrders));
     
     // Отправляем уведомление боту
-    tg.sendData(JSON.stringify({
-      action: 'approve_order',
-      order_id: orderId,
-      user_id: order.user_id,
-      amount: order.amount,
-      symbol: order.symbol,
-      login: order.login
-    }));
+    try {
+      tg.sendData(JSON.stringify({
+        action: 'approve_order',
+        order_id: orderId,
+        user_id: order.user_id,
+        amount: order.amount,
+        symbol: order.symbol,
+        login: order.login
+      }));
+    } catch(e) {
+      console.log("Ошибка отправки в бот:", e);
+    }
     
     // Обновляем отображение
     loadOrdersFromStorage();
@@ -611,13 +638,17 @@
     localStorage.setItem('egh_orders', JSON.stringify(localOrders));
     
     // Отправляем уведомление боту
-    tg.sendData(JSON.stringify({
-      action: 'reject_order',
-      order_id: orderId,
-      user_id: order.user_id,
-      amount: order.amount,
-      symbol: order.symbol
-    }));
+    try {
+      tg.sendData(JSON.stringify({
+        action: 'reject_order',
+        order_id: orderId,
+        user_id: order.user_id,
+        amount: order.amount,
+        symbol: order.symbol
+      }));
+    } catch(e) {
+      console.log("Ошибка отправки в бот:", e);
+    }
     
     // Обновляем отображение
     loadOrdersFromStorage();
@@ -634,6 +665,7 @@
     }
   }
 
+  // Закрытие дропдауна
   document.addEventListener("click", function(e) {
     const dropdown = document.getElementById("dropdown");
     if (dropdown && !dropdown.contains(e.target)) {
@@ -641,6 +673,7 @@
     }
   });
 
+  // Enter для отправки
   document.addEventListener("keypress", function(e) {
     if (e.key === "Enter" && document.getElementById("home").classList.contains("active")) {
       pay();
